@@ -1,11 +1,12 @@
 <?xml version="1.0"?>
-<!-- ======================================================================                                               
-     Pair - Python for the Adobe Integrated Runtime.
-                        
-     Author: Thijs Triemstra ( thijs@collab.nl )                                                                
-     ====================================================================== -->
 <project name="Pair" default="complete" basedir=".">
 	
+	<description>
+Pair - Python for the Adobe Integrated Runtime.
+                        
+Author: Thijs Triemstra ( thijs@collab.nl )
+	</description>
+
 	<tstamp>
 		<format property="formattedTimestamp" pattern="yyyy-MM-dd hh:mm:ss"/>
 	</tstamp>
@@ -40,7 +41,7 @@
     	<echo message="Using ${ant.version}"/>
     </target>
 	
-	<!-- - - - - - - - - - - - - - - - - - 
+    <!-- - - - - - - - - - - - - - - - - - 
           target: reports                      
     - - - - - - - - - - - - - - - - - -->
     <target name="reports" depends="config-report, air-report, build-report" 
@@ -106,14 +107,14 @@
     <target name="config-report" description="Create HTML report of project configuration">
     	<!-- create config report -->
     	<copy todir="${project.reportDir}/images" overwrite="true">
-	      		<fileset dir="resources/style/images"/>
+	      		<fileset dir="resources/report/images"/>
 	  	</copy>
-    	<copy file="resources/style/project.css" overwrite="true"
+    	<copy file="resources/report/css/project.css" overwrite="true"
     		  tofile="${project.reportDir}/css/project.css"/>
     	
 	    <xslt basedir="config" includes="project.xml"
 	      	  destdir="${project.reportDir}/reports" extension=".html"
-	      	  style="resources/style/project.xsl" force="true">
+	      	  style="resources/report/xslt/project.xsl" force="true">
 			<param name="timestamp" expression="${formattedTimestamp}"/>
 			<param name="flexVersion" expression="${flex.version}"/>
 			<param name="airVersion" expression="${project.air.runtime.version}"/>
@@ -127,7 +128,7 @@
     - - - - - - - - - - - - - - - - - -->
     <target name="build-report" description="Create report of completed build process">
     	<!-- create project report index page -->
-    	<copy overwrite="true" file="resources/style/html/index.html" 
+    	<copy overwrite="true" file="resources/report/html/index.html" 
     		  tofile="${project.reportDir}/index.html"/>
     	<property name="build.report" value="${project.reportDir}/index.html" />
     	<property name="dist.file" value="${project.distDir}/${project.name}_${project.version}.dmg"/>
@@ -157,7 +158,7 @@
 		actionscript-file-encoding="UTF-8" 
 		keep-generated-actionscript="false" 
 		incremental="true" benchmark="${project.flex.compiler.benchmark}"
-		link-report="${project.reportDir}/reports/actionscript-classes.xml"
+		link-report="${project.buildDir}/actionscript-classes.xml"
 		use-network="${project.flex.compiler.useNetwork}"> 
 			<!-- Get default compiler options. --> 
 			<load-config filename="${project.air.runtime.config}"/>        
@@ -184,12 +185,12 @@
             target: air-report
     - - - - - - - - - - - - - - - - - -->
     <target name="air-report" description="Create HTML link report for Actionscript classes">
-    	<xslt basedir="${project.reportDir}/reports" includes="actionscript-classes.xml"
+    	<xslt basedir="${project.buildDir}" includes="actionscript-classes.xml"
 	      	  destdir="${project.reportDir}/reports" extension=".html"
-	      	  style="resources/style/actionscript-classes.xsl" force="true">
+	      	  style="resources/report/xslt/actionscript-classes.xsl" force="true">
     		<param name="timestamp" expression="${formattedTimestamp}"/>
 		</xslt>
-    	<copy file="resources/style/css/dependencies.css" overwrite="true"
+    	<copy file="resources/report/css/dependencies.css" overwrite="true"
     		  tofile="${project.reportDir}/css/dependencies.css"/>
     </target>
 	
@@ -268,10 +269,10 @@
     <target name="air-debug" depends="air-validate"
     		description="Test the AIR application with the AIR Debug Launcher">
     	<exec executable="${project.air.runtime.debugger}" failonerror="true">
-			<arg line="-runtime '${project.air.runtime.macosx}'" />
+		<arg line="-runtime '${project.air.runtime.macosx}'" />
     		<arg line="${project.buildDir}/${project.air.adt.config}"/>
     		<arg line="."/>
-		</exec>
+	</exec>
     </target>
 	
 	<!-- - - - - - - - - - - - - - - - - - 
@@ -281,18 +282,18 @@
     	<record name="${build.logfile}" action="start"/>
     	<echo message="Using Flex SDK ${flex.version}"/>
     	<exec executable="${project.flex.compiler.asdoc}" failonerror="true">
-			<arg line='-source-path ${project.flex.source}'/>
+		<arg line='-source-path ${project.flex.source}'/>
     		<arg line='-library-path+="${project.flex.libraries}"'/>
-			<arg line='-doc-sources ${project.flex.asdoc.domainExtensions}'/>
+		<arg line='-doc-sources ${project.flex.asdoc.domainExtensions}'/>
     		<arg line='-load-config=${project.air.runtime.config}'/>
-			<arg line='-output ${project.flex.asdoc.outputDir}'/>
-			<arg line='-templates-path ${project.flex.asdoc.template}'/>
-			<arg line='-left-frameset-width ${project.flex.asdoc.frameWidth}'/>
+		<arg line='-output ${project.flex.asdoc.outputDir}'/>
+		<arg line='-templates-path ${project.flex.asdoc.template}'/>
+		<arg line='-left-frameset-width ${project.flex.asdoc.frameWidth}'/>
     		<arg line='-window-title "${project.flex.asdoc.windowTitle}"'/>
     		<arg line='-main-title "${project.flex.asdoc.mainTitle}"'/>
     		<arg line='-footer "${project.flex.asdoc.footer}"'/>
     		<arg line='-benchmark'/>
-		</exec>
+	</exec>
     	<record name="${build.logfile}" action="stop"/>
     </target>
 	
@@ -316,47 +317,47 @@
             target: python-mac
     - - - - - - - - - - - - - - - - - -->
     <target name="python-mac" depends="macosx.check" if="MacOSX"
-    		description="Create standalone Mac OSX application from Python code with py2app">
+    	    description="Create standalone Mac OSX application from Python code with py2app">
     	<record name="${build.logfile}" action="start"/>
-		<!-- update version -->
-		<copy file="${project.macosx.plist}" overwrite="true"
-			  tofile="${project.buildDir}/${project.macosx.plist}"/>
-		<updateVersion replaceFile="${project.buildDir}/${project.macosx.plist}"/>
-		<!-- copy icon -->
-		<copy file="${project.macosx.appIcon}" tofile="${project.buildDir}/${project.macosx.appIcon}"/>
-		<exec executable="python" outputproperty="python.version">
-			<arg line='--version'/>
-		</exec>
+	<!-- update version -->
+	<copy file="${project.macosx.plist}" overwrite="true"
+	      tofile="${project.buildDir}/${project.macosx.plist}"/>
+	<updateVersion replaceFile="${project.buildDir}/${project.macosx.plist}"/>
+	<!-- copy icon -->
+	<copy file="${project.macosx.appIcon}" tofile="${project.buildDir}/${project.macosx.appIcon}"/>
+	<exec executable="python" outputproperty="python.version">
+		<arg line='--version'/>
+	</exec>
     	<echo message="Using ${python.version}"/>
-		<!-- create application -->
-		<exec executable="python" failonerror="true" dir="${project.python.source}">
-			<arg line='setup.py'/>
-			<arg line='py2app'/>
-			<arg line='--plist=${basedir}/${project.buildDir}/${project.macosx.plist}'/>
-			<arg line='--frameworks="${project.air.runtime.macosx}"'/>
-			<arg line='--bdist-base=${basedir}/${project.buildDir}'/>
-			<arg line='--dist-dir=${basedir}/${project.imageDir}'/>
-			<arg line='--iconfile=${basedir}/${project.buildDir}/${project.macosx.appIcon}'/>
-			<arg line='--resources="${basedir}/${project.buildDir}/${project.air.adt.name}.air"'/>
-			<arg line='--includes="${project.python.includes}"'/>
-			<arg line='--optimize=${project.python.optimize}'/>
-			<arg line='--xref'/>
-		</exec>
-		<!-- move module cross-reference html report -->
-		<move file="${project.imageDir}/${project.name}.html" overwrite="true"
-			  tofile="${project.reportDir}/reports/python-modules.html"/>
+	<!-- create application -->
+	<exec executable="python" failonerror="true" dir="${project.python.source}">
+		<arg line='setup.py'/>
+		<arg line='py2app'/>
+		<arg line='--plist=${basedir}/${project.buildDir}/${project.macosx.plist}'/>
+		<arg line='--frameworks="${project.air.runtime.macosx}"'/>
+		<arg line='--bdist-base=${basedir}/${project.buildDir}'/>
+		<arg line='--dist-dir=${basedir}/${project.imageDir}'/>
+		<arg line='--iconfile=${basedir}/${project.buildDir}/${project.macosx.appIcon}'/>
+		<arg line='--resources="${basedir}/${project.buildDir}/${project.air.adt.name}.air"'/>
+		<arg line='--includes="${project.python.includes}"'/>
+		<arg line='--optimize=${project.python.optimize}'/>
+		<arg line='--xref'/>
+	</exec>
+	<!-- move module cross-reference html report -->
+	<move file="${project.imageDir}/${project.name}.html" overwrite="true"
+	      tofile="${project.reportDir}/reports/python-modules.html"/>
     	<record name="${build.logfile}" action="stop"/>
     </target>
 	
-	<!-- - - - - - - - - - - - - - - - - - 
+    <!-- - - - - - - - - - - - - - - - - - 
             target: python-docs
     - - - - - - - - - - - - - - - - - -->
     <target name="python-docs" description="Create API documentation for Python modules">
     	<record name="${build.logfile}" action="start"/>
     	<exec executable="pydoc" failonerror="true" dir="${project.python.source}">
-			<arg line='-w'/>
-			<arg line='helloworld'/>
-		</exec>
+		<arg line='-w'/>
+		<arg line='helloworld'/>
+	</exec>
     	<move overwrite="true" todir="${project.reportDir}/reports/api/python">
     		<fileset dir="${project.python.source}" casesensitive="yes">
     		  <include name="**/*.html"/>
@@ -365,7 +366,7 @@
     	<record name="${build.logfile}" action="stop"/>
     </target>
 	
-	<!-- - - - - - - - - - - - - - - - - - 
+    <!-- - - - - - - - - - - - - - - - - - 
             target: python-debug
     - - - - - - - - - - - - - - - - - -->
     <target name="python-debug" description="Test the standalone Python application">
@@ -380,36 +381,36 @@
     <target name="release-win" depends="windows.check" if="Windows"
     		description="Create distribution for Windows with NSIS">
     	<record name="${build.logfile}" action="start"/>
-		<!-- build an executable that forces single processor affinity -->
-		<exec executable="${project.windows.imgcfg}" failonerror="false" dir="${project.imageDir}">
-			<arg line='-u ${project.name}.exe'/>
-		</exec>
-		<exec executable="${project.windows.imgcfg}" failonerror="false" dir="${project.imageDir}">
-			<arg line='-a 0x1'/>
-			<arg line='${project.name}.exe'/>
-		</exec>
-		<!-- copy installer files -->
-		<copy file="${project.license}" tofile="${project.imageDir}/${project.license}"/>
-		<copy file="${project.windows.nsis.config}" 
-			  tofile="${project.imageDir}/${project.windows.nsis.config}"/>
-		<copy file="${project.windows.nsis.header}" 
-			  tofile="${project.imageDir}/${project.windows.nsis.header}"/>
-		<mkdir dir="${project.imageDir}/lang"/>
-		<copy todir="${project.imageDir}/lang">
-	    		<fileset dir="lang" includes="**/*.lang"/>
-	  	</copy>
-		<!-- copy AIR runtime -->
-		<copy todir="${project.imageDir}/Adobe AIR">
-	      		<fileset dir="${project.air.runtime.windows}"/>
-	  	</copy>
-		<!-- update installer -->
-		<updateNSIS replaceFile="${project.imageDir}/${project.windows.nsis.config}"/>
-		<!-- create installer executable -->
-		<exec executable="${project.windows.nsis.exe}" failonerror="true" dir="${project.imageDir}">
-			<arg line='${project.imageDir}/${project.windows.nsis.config}'/>
-		</exec>
-		<move file="${project.imageDir}/${windows.installer}" 
-			  tofile="${project.distDir}/${windows.installer}"/>
+	<!-- build an executable that forces single processor affinity -->
+	<exec executable="${project.windows.imgcfg}" failonerror="false" dir="${project.imageDir}">
+		<arg line='-u ${project.name}.exe'/>
+	</exec>
+	<exec executable="${project.windows.imgcfg}" failonerror="false" dir="${project.imageDir}">
+		<arg line='-a 0x1'/>
+		<arg line='${project.name}.exe'/>
+	</exec>
+	<!-- copy installer files -->
+	<copy file="${project.license}" tofile="${project.imageDir}/${project.license}"/>
+	<copy file="${project.windows.nsis.config}" 
+	      tofile="${project.imageDir}/${project.windows.nsis.config}"/>
+	<copy file="${project.windows.nsis.header}" 
+	      tofile="${project.imageDir}/${project.windows.nsis.header}"/>
+	<mkdir dir="${project.imageDir}/lang"/>
+	<copy todir="${project.imageDir}/lang">
+	      <fileset dir="lang" includes="**/*.lang"/>
+	</copy>
+	<!-- copy AIR runtime -->
+	<copy todir="${project.imageDir}/Adobe AIR">
+		<fileset dir="${project.air.runtime.windows}"/>
+	</copy>
+	<!-- update installer -->
+	<updateNSIS replaceFile="${project.imageDir}/${project.windows.nsis.config}"/>
+	<!-- create installer executable -->
+	<exec executable="${project.windows.nsis.exe}" failonerror="true" dir="${project.imageDir}">
+		<arg line='${project.imageDir}/${project.windows.nsis.config}'/>
+	</exec>
+	<move file="${project.imageDir}/${windows.installer}" 
+	      tofile="${project.distDir}/${windows.installer}"/>
     	<!-- generate checksums -->
     	<checksums file="${project.distDir}/${windows.installer}"/>
     	<record name="${build.logfile}" action="stop"/>
@@ -646,21 +647,21 @@
     - - - - - - - - - - - - - - - - - -->
     <macrodef name="updateNSIS" description="Update NSIS configuration file">
     	<attribute name="replaceFile"/>                       
-   		<sequential>
+   	<sequential>
 	      	<replace file="@{replaceFile}">
-				<replacefilter token="@VERSION@" property="VERSION"/>
-				<replacefilter token="@APPNAME@" property="application.name"/>
-				<replacefilter token="@HEADING@" property="installer.header"/>
-				<replacefilter token="@LICENSE@" property="license.file"/>
-			</replace>
-   		</sequential>
+			<replacefilter token="@VERSION@" property="VERSION"/>
+			<replacefilter token="@APPNAME@" property="application.name"/>
+			<replacefilter token="@HEADING@" property="installer.header"/>
+			<replacefilter token="@LICENSE@" property="license.file"/>
+		</replace>
+   	</sequential>
     </macrodef>
 	
-	<!-- - - - - - - - - - - - - - - - - - 
+    <!-- - - - - - - - - - - - - - - - - - 
             scriptdef: getFilesize
     - - - - - - - - - - - - - - - - - -->
-	<scriptdef name="getFilesize" language="javascript" description="Get size for selected file (in MB)">
-		<attribute name="file"/>
+    <scriptdef name="getFilesize" language="javascript" description="Get size for selected file (in MB)">
+	<attribute name="file"/>
         <attribute name="property"/>
         <![CDATA[
             fileName = attributes.get("file");
