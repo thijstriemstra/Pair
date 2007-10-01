@@ -13,8 +13,8 @@ tell application "Finder"
 	           delay 1
 	           set icon size of the icon view options of container window to 128
 	           set arrangement of the icon view options of container window to not arranged
-	           set background picture of the icon view options of container window to file ".background:background.png"
-	           set position of item "@APPNAME@.app" to {150, 140}
+	           set background picture of the icon view options of container window to file (item 2 of argv as string)
+	           set position of item (item 3 of argv as string) to {150, 140}
 	           set position of item "Applications" to {410, 140}
 	           set the bounds of the container window to {50, 100, 600, 400}
 	           update without registering applications

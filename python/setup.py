@@ -1,5 +1,5 @@
 """
-    py2app/py2exe build script for Pair.
+    py2app/py2exe build script.
 
     Will automatically ensure that all build prerequisites are available
     via ez_setup.
@@ -17,7 +17,7 @@ ez_setup.use_setuptools()
 import sys
 from setuptools import setup
 
-mainscript = "pair.py"
+mainscript = "helloworld.py"
 
 # Mac OS X
 if sys.platform == 'darwin':
@@ -42,6 +42,6 @@ else:
      )
 
 setup(
-    name="Pair",
+    name="Hello World",
     **extra_options
 )

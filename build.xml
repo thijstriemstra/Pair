@@ -1,392 +1,676 @@
 <?xml version="1.0"?>
 <!-- ======================================================================                                               
-     Pair - Python for the Adobe Integrated Runtime   
+     Pair - Python for the Adobe Integrated Runtime.
                         
-     Thijs Triemstra (info@collab.nl)                                                                
+     Author: Thijs Triemstra ( thijs@collab.nl )                                                                
      ====================================================================== -->
 <project name="Pair" default="complete" basedir=".">
 	
-	<!-- Flex SDK config -->
-	<property file="flex/flex.properties" />
+	<tstamp>
+		<format property="formattedTimestamp" pattern="yyyy-MM-dd hh:mm:ss"/>
+	</tstamp>
 	
-	<!-- Flex SDK version info -->
-	<xmlproperty file="${flex.description}" />
-
 	<!-- Project config -->
-	<property file="./build.properties" />
-	
+	<xmlproperty file="config/project.xml"/>
+
 	<!-- Flex Ant tasks -->
-  	<taskdef resource="flexTasks.tasks" classpath="${flex.ant}" />  
+  	<taskdef resource="flexTasks.tasks" classpath="${project.flex.compiler.flexTasks}"/>  
 
+	<!-- Flex SDK version info -->
+	<xmlproperty file="${project.flex.compiler.home}/flex-sdk-description.xml"/>
+	
+	<property name="flex.version"
+		  value="${flex-sdk-description.version} (build ${flex-sdk-description.build})"/>
+
+	<property name="FLEX_HOME" value="${project.flex.compiler.home}"/>
+	
+	<property name="build.logfile" value="${project.buildDir}/build.log"/>
+	
 	<!-- leftover files -->	
-	<available file="${mount.dir}" type="dir" property="mount.dir.present"/>
-
-    <description>
-    	Pair
-    </description>
-
+	<available file="${project.macosx.mountDir}" type="dir" property="mount.dir.present"/>
+	
     <!-- - - - - - - - - - - - - - - - - - 
           target: complete                      
     - - - - - - - - - - - - - - - - - -->
-    <target name="complete" depends="clean, init, swf, air,
-		  python-mac, release-mac, python-win, release-win">
-    	<echo>
-	Completed building ${ant.project.name} for ${os.name}
-	</echo>
+    <target name="complete" depends="clean, prepare, config-report, air-compile, air-report,
+    	air-docs, air-certificate, air-package, python-mac, python-win, python-docs,
+    	release-mac, release-win, build-report" 
+    	description="Main build target that runs all tasks">
+    	<echo message="Completed building ${project.name} for ${os.name}"/>
+    	<echo message="Using ${ant.version}"/>
+    </target>
+	
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: reports                      
+    - - - - - - - - - - - - - - - - - -->
+    <target name="reports" depends="config-report, air-report, build-report" 
+    	description="Run all report tasks">
+    	<echo message="Finished generating reports."/>
+    </target>
+	
+	<!-- - - - - - - - - - - - - - - - - - 
+          target: docs                      
+    - - - - - - - - - - - - - - - - - -->
+    <target name="docs" depends="air-docs, python-docs" 
+    	description="Run all documentation tasks">
+    	<echo message="Finished generating documentation."/>
     </target>
    
     <!-- - - - - - - - - - - - - - - - - - 
           target: clean                      
     - - - - - - - - - - - - - - - - - -->
-    <target name="clean" depends="unmount">
-	<!-- unlink Applications folder before deleting symlink -->
-	<exec executable="unlink" failonerror="false" os="Mac OS X">
-		<arg line='${image.dir}/Applications'/>
-	</exec>
-	<delete failOnError="false" includeEmptyDirs="true">
-    		<fileset dir="${build.dir}" followsymlinks="false"/>
-  	</delete>
-	<exec executable="rm" failonerror="false" os="Mac OS X">
-		<arg line='-rf ${build.dir}'/>
-	</exec>	
-	<delete includeEmptyDirs="true" failOnError="false">
-    		<fileset dir="${dist.dir}" followsymlinks="false"/>
-  	</delete>
-	<delete includeEmptyDirs="true" failOnError="false">
-    		<fileset dir="${src.python}/build" followsymlinks="false"/>
-  	</delete>
-	<delete dir="${asdoc.output.dir}" 
-    		failOnError="false" 
-    		includeEmptyDirs="true" />
-	<delete dir="${report.dir}" 
-    		failOnError="false" 
-    		includeEmptyDirs="true" />
+    <target name="clean" depends="macosx.unmount" 
+    		description="Clean up old build files and directories">
+		<!-- Unlink Applications folder before deleting symlink -->
+		<exec executable="unlink" failonerror="false" os="Mac OS X">
+			<arg line='${project.imageDir}/Applications'/>
+		</exec>
+		<delete failOnError="false" includeEmptyDirs="true">
+	    		<fileset dir="${project.buildDir}" followsymlinks="false"/>
+	  	</delete>
+		<exec executable="rm" failonerror="false" os="Mac OS X">
+			<arg line='-rf ${project.buildDir}'/>
+		</exec>	
+    	<delete dir="${project.distDir}" 
+    		    failOnError="false" 
+    		    includeEmptyDirs="true" />
+		<delete dir="${project.reportDir}" 
+	    		failOnError="false" 
+	    		includeEmptyDirs="true" />
+    	<delete dir="${project.flex.asdoc.outputDir}" 
+    		    		failOnError="false" 
+    		    		includeEmptyDirs="true" />
+    	<!-- Remove .cache files created by the Flex 3 beta compiler -->
+    	<delete>
+    	    <fileset dir="flex" includes="**/*.cache"/>
+    	</delete>
+    </target>
+	
+	<!-- - - - - - - - - - - - - - - - - - 
+	      target: prepare                      
+    - - - - - - - - - - - - - - - - - -->
+    <target name="prepare" description="Create temporary directories for the build process">
+    	<mkdir dir="${project.buildDir}"/>
+		<mkdir dir="${project.imageDir}"/>
+		<mkdir dir="${project.distDir}"/>
+		<mkdir dir="${project.reportDir}"/>
+    	<mkdir dir="${project.reportDir}/reports"/>
+    	<mkdir dir="${project.flex.asdoc.outputDir}"/>
+    	<!-- Check for available AIR certificate. -->
+    	<available file="${project.air.certificate.file}" property="air.certificate.available"/>
+    </target>
+	
+	<!-- - - - - - - - - - - - - - - - - - 
+            target: config-report
+    - - - - - - - - - - - - - - - - - -->
+    <target name="config-report" description="Create HTML report of project configuration">
+    	<!-- create config report -->
+    	<copy todir="${project.reportDir}/images" overwrite="true">
+	      		<fileset dir="resources/style/images"/>
+	  	</copy>
+    	<copy file="resources/style/project.css" overwrite="true"
+    		  tofile="${project.reportDir}/css/project.css"/>
+    	
+	    <xslt basedir="config" includes="project.xml"
+	      	  destdir="${project.reportDir}/reports" extension=".html"
+	      	  style="resources/style/project.xsl" force="true">
+			<param name="timestamp" expression="${formattedTimestamp}"/>
+			<param name="flexVersion" expression="${flex.version}"/>
+			<param name="airVersion" expression="${project.air.runtime.version}"/>
+		</xslt>
+    	<move file="${project.reportDir}/reports/project.html" overwrite="true"
+    		  tofile="${project.reportDir}/reports/project-config.html"/>
+    </target>
+	
+	<!-- - - - - - - - - - - - - - - - - - 
+            target: build-report
+    - - - - - - - - - - - - - - - - - -->
+    <target name="build-report" description="Create report of completed build process">
+    	<!-- create project report index page -->
+    	<copy overwrite="true" file="resources/style/html/index.html" 
+    		  tofile="${project.reportDir}/index.html"/>
+    	<property name="build.report" value="${project.reportDir}/index.html" />
+    	<property name="dist.file" value="${project.distDir}/${project.name}_${project.version}.dmg"/>
+    	<loadfile property="md5" srcFile="${dist.file}.MD5"/>
+    	<loadfile property="sha" srcFile="${dist.file}.asc"/>
+	    <getFilesize property="file.size" file="${dist.file}"/>
+    	<sequential>
+	      	<replace file="${build.report}">
+	      		<replacefilter token="@FILENAME@" value="${dist.file}"/>
+	    		<replacefilter token="@FILESIZE@" value="${file.size}"/>
+				<replacefilter token="@APPNAME@" value="${project.name}"/>
+				<replacefilter token="@MD5@" value="${md5}"/>
+	    		<replacefilter token="@SHA@" value="${sha}"/>
+	      		<replacefilter token="@OS@" value="${os.name}"/>
+			</replace>
+   		</sequential>
     </target>
 	
     <!-- - - - - - - - - - - - - - - - - - 
-          target: init                      
+          target: air-compile
     - - - - - - - - - - - - - - - - - -->
-    <target name="init">
-    	<mkdir dir="${build.dir}"/>
-	<mkdir dir="${image.dir}"/>
-	<mkdir dir="${dist.dir}"/>
-	<mkdir dir="${report.dir}"/>
+    <target name="air-compile" description="Compile the AIR application">
+    	<record name="${build.logfile}" action="start" append="yes" loglevel="info"/>
+		<echo message="Using Flex SDK ${flex.version}"/>
+		<mxmlc file="${project.flex.mxml}" 
+		output="${project.buildDir}/${project.flex.swfName}.swf" 
+		actionscript-file-encoding="UTF-8" 
+		keep-generated-actionscript="false" 
+		incremental="true" benchmark="${project.flex.compiler.benchmark}"
+		link-report="${project.reportDir}/reports/actionscript-classes.xml"
+		use-network="${project.flex.compiler.useNetwork}"> 
+			<!-- Get default compiler options. --> 
+			<load-config filename="${project.air.runtime.config}"/>        
+			<!-- List of path elements that form the roots of ActionScript class hierarchies. --> 
+			<source-path path-element="${project.flex.compiler.home}/frameworks"/> 
+			<source-path path-element="${project.flex.source}"/> 
+			<!-- External libraries -->
+			<compiler.library-path dir="${project.flex.libraries}" append="true"> 
+				<include name="**/*.swc"/>
+			</compiler.library-path>
+			<!-- SDK core (locale is included in .swc with Flex 3) -->
+			<compiler.library-path dir="${project.flex.compiler.home}/frameworks" append="true"> 
+				<include name="libs"/>  
+			</compiler.library-path> 
+			<!-- SWF metadata -->
+			<metadata description="${project.description}" 
+					  date="${formattedTimestamp}"
+					  title="${project.name}"/>
+		</mxmlc>
+    	<record name="${build.logfile}" action="stop"/>
+    </target>
+	
+	<!-- - - - - - - - - - - - - - - - - - 
+            target: air-report
+    - - - - - - - - - - - - - - - - - -->
+    <target name="air-report" description="Create HTML link report for Actionscript classes">
+    	<xslt basedir="${project.reportDir}/reports" includes="actionscript-classes.xml"
+	      	  destdir="${project.reportDir}/reports" extension=".html"
+	      	  style="resources/style/actionscript-classes.xsl" force="true">
+    		<param name="timestamp" expression="${formattedTimestamp}"/>
+		</xslt>
+    	<copy file="resources/style/css/dependencies.css" overwrite="true"
+    		  tofile="${project.reportDir}/css/dependencies.css"/>
     </target>
 	
     <!-- - - - - - - - - - - - - - - - - - 
-            target: docs
+            target: air-certificate
     - - - - - - - - - - - - - - - - - -->
-    <target name="docs">
-	<mkdir dir="${asdoc.output.dir}"/>
-    	<exec executable="${FLEX_HOME}/${flex.doc}" failonerror="false">
-		<arg line='-source-path ${src.flex}'/>
-		<arg line='-doc-sources ${asdoc.domainextensions}'/>
-    		<arg line='-load-config=${air.config}'/>
-		<arg line='-output ${asdoc.output.dir}'/>
-		<arg line='-templates-path ${asdoc.templates.dir}'/>
-		<arg line='-left-frameset-width ${asdoc.framewidth}'/>
-		<arg line='-benchmark'/>
-	</exec>
+    <target name="air-certificate" unless="air.certificate.available"
+    		description="Create certificate for AIR application">
+    	
+    	<record name="${build.logfile}" action="start"/>
+    	<input
+    	    message="Please enter password for the certificate or press Enter for default:"
+    	    addproperty="air.certificate.password"
+    	    defaultvalue="${project.air.certificate.password}"/>
+    	
+		<java jar="${project.air.runtime.packager}" fork="true" failonerror="true"
+	 	maxmemory="1024m" classpath="${project.flex.compiler.libraries}/xercesImpl.jar">
+			<arg line="-certificate" />
+			<arg line="-cn '${project.air.certificate.name}'"/>
+			<arg line="-ou '${project.organization.unit}'"/>
+			<arg line="-o '${project.organization.name}'"/>
+			<arg line="-c '${project.organization.country}'"/>
+			<arg line="${project.air.certificate.type}"/>
+			<arg line="${project.buildDir}/${project.air.certificate.file}"/>
+			<arg line="${air.certificate.password}"/>
+		</java>
+    	<record name="${build.logfile}" action="stop"/>
     </target>
 
     <!-- - - - - - - - - - - - - - - - - - 
-          target: swf
+            target: air-package
     - - - - - - - - - - - - - - - - - -->
-    <target name="swf">
-	<echo>Flex SDK ${flex-sdk-description.version} (build ${flex-sdk-description.build})</echo>
-	<mxmlc 
-	file="${main.application}" 
-	output="${build.dir}/${application.swf}" 
-	actionscript-file-encoding="UTF-8" 
-	keep-generated-actionscript="false" 
-	incremental="true" benchmark="true"> 
-		<!-- Get default compiler options. --> 
-		<load-config filename="${air.config}"/>            
-		<!-- List of path elements that form the roots of ActionScript class hierarchies. --> 
-		<source-path path-element="${FLEX_HOME}/frameworks"/> 
-		<source-path path-element="${src.flex}"/> 
-		<!-- Flex SDK core (locale is included in .swc with Flex 3) -->
-		<compiler.library-path dir="${FLEX_HOME}/frameworks" append="true"> 
-			<include name="libs"/>  
-		</compiler.library-path> 
-	</mxmlc>
+    <target name="air-package" description="Package the AIR application">
+		<copy file="${project.air.adt.config}" 
+			  tofile="${project.buildDir}/${project.air.adt.config}"/>
+		<!-- update air config -->
+		<updateAirConfig replaceFile="${project.buildDir}/${project.air.adt.config}"/>
+		<!-- copy icons -->
+		<copy todir="${project.buildDir}/icons">
+	    	<fileset dir="${project.air.adt.iconsFolder}"/>
+	  	</copy>
+    	<record name="${build.logfile}" action="start"/>
+    	<echo message="Using AIR ${project.air.runtime.version}"/>
+		<java jar="${project.air.runtime.packager}" fork="true" failonerror="true"
+		maxmemory="1024m" classpath="${project.flex.compiler.libraries}/xercesImpl.jar">
+			<arg line="-package" />
+			<arg line="-certificate ${project.buildDir}/${project.air.certificate.file}" />
+			<arg line="-password '${project.air.certificate.password}'" />
+			<arg line="'${project.buildDir}/${project.air.adt.name}'" />
+			<!-- Load AIR application XML file -->
+			<arg line="'${project.buildDir}/${project.air.adt.config}'" />
+			<!-- Include icons --> 
+			<arg line="${project.buildDir}/icons" />
+			<!-- Include SWF application -->
+			<arg line="'${project.buildDir}/${project.flex.swfName}.swf'" />
+		</java>
+    	<record name="${build.logfile}" action="stop"/>
     </target>
 	
-    <!-- - - - - - - - - - - - - - - - - - 
-            target: air
+	<!-- - - - - - - - - - - - - - - - - - 
+	            target: air-validate
+	- - - - - - - - - - - - - - - - - -->
+	<target name="air-validate" description="Validate AIR application descriptor file"> 
+		<property name="air-schema" 
+		value="${project.flex.compiler.home}/templates/air/Descriptor.${project.air.runtime.version}.xsd"/>
+		<schemavalidate file="${project.buildDir}/${project.air.adt.config}">
+	        <schema namespace="http://ns.adobe.com/air/application/${project.air.runtime.version}"
+	        		file="${air-schema}"/>
+	        <schema namespace="http://www.w3.org/2001/XMLSchema" file="${air-schema}"/>
+       </schemavalidate>
+    </target> 
+	
+	<!-- - - - - - - - - - - - - - - - - - 
+            target: air-debug
     - - - - - - - - - - - - - - - - - -->
-    <target name="air">
-	<copy file="flex/${application.config.air}" tofile="${build.dir}/${application.config.air}"/>
-	<!-- update air version -->
-	<updateVersion replaceFile="${build.dir}/${application.config.air}"/>
-	<!-- update air config -->
-	<updateAirConfig replaceFile="${build.dir}/${application.config.air}"/>
-	<!-- copy icons -->
-	<copy todir="${build.dir}/icons">
-    		<fileset dir="${application.icons}"/>
-  	</copy>
-	<!-- build air application -->
-	<java jar="${air.packager}" fork="true" failonerror="true"
- 	maxmemory="1024m" classpath="${flex.lib}/xercesImpl.jar">
-		<!-- Create AIR file. -->
-		<arg line="-package '${build.dir}/${application.air}'" />
-		<!-- Load AIR application XML file. -->
-		<arg line="'${build.dir}/${application.config.air}'" />
-		<!-- Include icons. --> 
-		<arg line="${build.dir}/icons" />
-		<!-- Include SWF application. -->
-		<arg line="'${build.dir}/${application.swf}'" />
-	</java>
+    <target name="air-debug" depends="air-validate"
+    		description="Test the AIR application with the AIR Debug Launcher">
+    	<exec executable="${project.air.runtime.debugger}" failonerror="true">
+			<arg line="-runtime '${project.air.runtime.macosx}'" />
+    		<arg line="${project.buildDir}/${project.air.adt.config}"/>
+    		<arg line="."/>
+		</exec>
     </target>
-
+	
+	<!-- - - - - - - - - - - - - - - - - - 
+            target: air-docs
+    - - - - - - - - - - - - - - - - - -->
+    <target name="air-docs" description="Create API documentation for Actionscript classes">
+    	<record name="${build.logfile}" action="start"/>
+    	<echo message="Using Flex SDK ${flex.version}"/>
+    	<exec executable="${project.flex.compiler.asdoc}" failonerror="true">
+			<arg line='-source-path ${project.flex.source}'/>
+    		<arg line='-library-path+="${project.flex.libraries}"'/>
+			<arg line='-doc-sources ${project.flex.asdoc.domainExtensions}'/>
+    		<arg line='-load-config=${project.air.runtime.config}'/>
+			<arg line='-output ${project.flex.asdoc.outputDir}'/>
+			<arg line='-templates-path ${project.flex.asdoc.template}'/>
+			<arg line='-left-frameset-width ${project.flex.asdoc.frameWidth}'/>
+    		<arg line='-window-title "${project.flex.asdoc.windowTitle}"'/>
+    		<arg line='-main-title "${project.flex.asdoc.mainTitle}"'/>
+    		<arg line='-footer "${project.flex.asdoc.footer}"'/>
+    		<arg line='-benchmark'/>
+		</exec>
+    	<record name="${build.logfile}" action="stop"/>
+    </target>
+	
     <!-- - - - - - - - - - - - - - - - - - 
             target: python-win
     - - - - - - - - - - - - - - - - - -->
-    <target name="python-win" depends="windows.check" if="Windows">
-	<!-- run py2exe -->
-	<exec executable="${PYTHON}" failonerror="true">
-		<arg line='setup.py'/>
-		<arg line='py2exe'/>
-		<arg line='--dist-dir=${image.dir}'/>
-	</exec>
+    <target name="python-win" depends="windows.check" if="Windows"
+    		description="Create standalone Windows application from Python code with py2exe">
+    	<record name="${build.logfile}" action="start"/>
+		<!-- run py2exe -->
+		<exec executable="${project.python.windows}" failonerror="true">
+			<arg line="setup.py"/>
+			<arg line="py2exe"/>
+			<arg line="--dist-dir=${project.imageDir}"/>
+			<arg line="--optimize=${project.python.optimize}"/>
+		</exec>
+    	<record name="${build.logfile}" action="stop"/>
     </target>
 
     <!-- - - - - - - - - - - - - - - - - - 
             target: python-mac
     - - - - - - - - - - - - - - - - - -->
-    <target name="python-mac" depends="macosx.check" if="MacOSX">
-	<!-- update version -->
-	<copy file="${application.plist}" tofile="${build.dir}/${application.plist}"/>
-	<updateVersion replaceFile="${build.dir}/${application.plist}"/>
-	<!-- copy icon -->
-	<copy file="${application.icon}" tofile="${build.dir}/app.icns"/>
-	<!-- run py2app -->
-	<exec executable="python" failonerror="true" dir="python">
-		<arg line='setup.py'/>
-		<arg line='py2app'/>
-		<arg line='--plist=${basedir}/${build.dir}/${application.plist}'/>
-		<arg line='--frameworks="${air.runtime.mac}"'/>
-		<arg line='--bdist-base=${basedir}/${build.dir}'/>
-		<arg line='--dist-dir=${basedir}/${build.dir}'/>
-		<arg line='--iconfile=${basedir}/${build.dir}/app.icns'/>
-		<arg line='--resources=${basedir}/${build.dir}/${application.air}'/>
-		<arg line='--includes="${python.includes}"'/>
-		<arg line='--xref'/>
-	</exec>
-	<!-- move module cross-reference html report -->
-	<move file="${build.dir}/${application.name}.html" tofile="${report.dir}/python-modules.html"/>
+    <target name="python-mac" depends="macosx.check" if="MacOSX"
+    		description="Create standalone Mac OSX application from Python code with py2app">
+    	<record name="${build.logfile}" action="start"/>
+		<!-- update version -->
+		<copy file="${project.macosx.plist}" overwrite="true"
+			  tofile="${project.buildDir}/${project.macosx.plist}"/>
+		<updateVersion replaceFile="${project.buildDir}/${project.macosx.plist}"/>
+		<!-- copy icon -->
+		<copy file="${project.macosx.appIcon}" tofile="${project.buildDir}/${project.macosx.appIcon}"/>
+		<exec executable="python" outputproperty="python.version">
+			<arg line='--version'/>
+		</exec>
+    	<echo message="Using ${python.version}"/>
+		<!-- create application -->
+		<exec executable="python" failonerror="true" dir="${project.python.source}">
+			<arg line='setup.py'/>
+			<arg line='py2app'/>
+			<arg line='--plist=${basedir}/${project.buildDir}/${project.macosx.plist}'/>
+			<arg line='--frameworks="${project.air.runtime.macosx}"'/>
+			<arg line='--bdist-base=${basedir}/${project.buildDir}'/>
+			<arg line='--dist-dir=${basedir}/${project.imageDir}'/>
+			<arg line='--iconfile=${basedir}/${project.buildDir}/${project.macosx.appIcon}'/>
+			<arg line='--resources="${basedir}/${project.buildDir}/${project.air.adt.name}.air"'/>
+			<arg line='--includes="${project.python.includes}"'/>
+			<arg line='--optimize=${project.python.optimize}'/>
+			<arg line='--xref'/>
+		</exec>
+		<!-- move module cross-reference html report -->
+		<move file="${project.imageDir}/${project.name}.html" overwrite="true"
+			  tofile="${project.reportDir}/reports/python-modules.html"/>
+    	<record name="${build.logfile}" action="stop"/>
+    </target>
+	
+	<!-- - - - - - - - - - - - - - - - - - 
+            target: python-docs
+    - - - - - - - - - - - - - - - - - -->
+    <target name="python-docs" description="Create API documentation for Python modules">
+    	<record name="${build.logfile}" action="start"/>
+    	<exec executable="pydoc" failonerror="true" dir="${project.python.source}">
+			<arg line='-w'/>
+			<arg line='helloworld'/>
+		</exec>
+    	<move overwrite="true" todir="${project.reportDir}/reports/api/python">
+    		<fileset dir="${project.python.source}" casesensitive="yes">
+    		  <include name="**/*.html"/>
+    		</fileset>
+    	</move>
+    	<record name="${build.logfile}" action="stop"/>
+    </target>
+	
+	<!-- - - - - - - - - - - - - - - - - - 
+            target: python-debug
+    - - - - - - - - - - - - - - - - - -->
+    <target name="python-debug" description="Test the standalone Python application">
+    	<exec 
+    		executable="${project.imageDir}/${project.name}.app/Contents/MacOS/${project.macosx.bundleId}"
+    	/>
     </target>
 
     <!-- - - - - - - - - - - - - - - - - - 
             target: release-win
     - - - - - - - - - - - - - - - - - -->
-    <target name="release-win" depends="windows.check" if="Windows">
-	<!-- build an executable that forces single processor affinity -->
-	<exec executable="${IMGCFG}" failonerror="false" dir="${image.dir}">
-		<arg line='-u pair.exe'/>
-	</exec>
-	<exec executable="${IMGCFG}" failonerror="false" dir="${image.dir}">
-		<arg line='-a 0x1'/>
-		<arg line='pair.exe'/>
-	</exec>
-	<!-- copy installer files -->
-	<copy file="${license.file}" tofile="${image.dir}/${license.file}"/>
-	<copy file="resources/win/${NSIS.config}" tofile="${image.dir}/${NSIS.config}"/>
-	<copy file="resources/win/${installer.header}" tofile="${image.dir}/${installer.header}"/>
-	<mkdir dir="${image.dir}/lang"/>
-	<copy todir="${image.dir}/lang">
-    		<fileset dir="lang" includes="**/*.lang"/>
-  	</copy>
-	<!-- copy AIR runtime -->
-	<copy todir="${image.dir}/Adobe AIR">
-      		<fileset dir="${air.runtime.win}"/>
-  	</copy>
-	<!-- update installer -->
-	<updateNSIS replaceFile="${image.dir}/${NSIS.config}"/>
-	<!-- create installer -->
-	<exec executable="${NSIS}" failonerror="true" dir="${image.dir}">
-		<arg line='${image.dir}/${NSIS.config}'/>
-	</exec>
-	<move file="${image.dir}/${windows.installer}" tofile="${dist.dir}/${windows.installer}"/>
+    <target name="release-win" depends="windows.check" if="Windows"
+    		description="Create distribution for Windows with NSIS">
+    	<record name="${build.logfile}" action="start"/>
+		<!-- build an executable that forces single processor affinity -->
+		<exec executable="${project.windows.imgcfg}" failonerror="false" dir="${project.imageDir}">
+			<arg line='-u ${project.name}.exe'/>
+		</exec>
+		<exec executable="${project.windows.imgcfg}" failonerror="false" dir="${project.imageDir}">
+			<arg line='-a 0x1'/>
+			<arg line='${project.name}.exe'/>
+		</exec>
+		<!-- copy installer files -->
+		<copy file="${project.license}" tofile="${project.imageDir}/${project.license}"/>
+		<copy file="${project.windows.nsis.config}" 
+			  tofile="${project.imageDir}/${project.windows.nsis.config}"/>
+		<copy file="${project.windows.nsis.header}" 
+			  tofile="${project.imageDir}/${project.windows.nsis.header}"/>
+		<mkdir dir="${project.imageDir}/lang"/>
+		<copy todir="${project.imageDir}/lang">
+	    		<fileset dir="lang" includes="**/*.lang"/>
+	  	</copy>
+		<!-- copy AIR runtime -->
+		<copy todir="${project.imageDir}/Adobe AIR">
+	      		<fileset dir="${project.air.runtime.windows}"/>
+	  	</copy>
+		<!-- update installer -->
+		<updateNSIS replaceFile="${project.imageDir}/${project.windows.nsis.config}"/>
+		<!-- create installer executable -->
+		<exec executable="${project.windows.nsis.exe}" failonerror="true" dir="${project.imageDir}">
+			<arg line='${project.imageDir}/${project.windows.nsis.config}'/>
+		</exec>
+		<move file="${project.imageDir}/${windows.installer}" 
+			  tofile="${project.distDir}/${windows.installer}"/>
+    	<!-- generate checksums -->
+    	<checksums file="${project.distDir}/${windows.installer}"/>
+    	<record name="${build.logfile}" action="stop"/>
     </target>
 
     <!-- - - - - - - - - - - - - - - - - - 
             target: release-mac
     - - - - - - - - - - - - - - - - - -->
-    <target name="release-mac" depends="macosx.check" if="MacOSX">
-	<!-- background -->
-	<mkdir dir="${image.dir}/.background"/>
-	<copy file="${background.image}" todir="${image.dir}/.background"/>
-	<!-- volume icon -->
-	<copy file="${volume.icon}" tofile="${image.dir}/.VolumeIcon.icns"/>
-	<!-- shortcut to /Applications -->
-	<exec executable="ln" failonerror="true">
-		<arg line='-s /Applications ${image.dir}/Applications'/>
-	</exec>
-	<!-- add application -->
-	<move file="${build.dir}/${application.name}.app" tofile="${image.dir}/${application.name}.app"/>
-	<!-- update the access and modification times of the files -->
-	<exec executable="touch" failonerror="true">
-		<arg line='${image.dir}'/>
-	</exec>
-	<!-- create image -->
-	<exec executable="hdiutil" failonerror="true">
-		<arg line='create'/>
-		<arg line='-srcfolder ${image.dir}'/>
-		<arg line='-format UDRW'/>
-		<arg line='-scrub'/>
-		<arg line='-volname ${application.name}'/>
-		<arg line='${build.dir}/${mac.installer}'/>
-	</exec>
-	<!-- open image -->
-	<exec executable="hdiutil" failonerror="true">
-		<arg line='attach'/>
-		<arg line='-readwrite'/>
-		<arg line='-noverify'/>
-		<arg line='-noautoopen'/>
-		<arg line='-mountpoint ${mount.dir}'/>
-		<arg line='${build.dir}/${mac.installer}'/>
-	</exec>
-	<!-- make sure root folder is opened when image is -->
-	<exec executable="bless" failonerror="true">
-		<arg line='--folder ${mount.dir}'/>
-		<arg line='--openfolder ${mount.dir}'/>
-	</exec>
-	<!-- hack: wait for completion -->
-	<exec executable="sleep" failonerror="true">
-		<arg line='1'/>
-	</exec>
-	<!-- update position script -->
-	<copy file="${position.scpt}" tofile="${build.dir}/${position.scpt}"/>
-	<replace file="${build.dir}/${position.scpt}" propertyFile="build.properties">
-  		<replacefilter token="@APPNAME@" property="application.name"/>
-	</replace>
-	<!-- position installer items -->
-	<exec executable="osascript" failonerror="true">
-		<arg line='${build.dir}/${position.scpt}'/>
-		<arg line='${mount.dir}'/>
-	</exec> 
-	<!-- turn on custom volume icon -->
-	<exec executable="/Developer/Tools/SetFile" failonerror="true">
-		<arg line='-a C'/>
-		<arg line='${mount.dir}'/>
-	</exec>
-	<!-- close image -->
-	<exec executable="hdiutil" failonerror="true">
-		<arg line='detach'/>
-		<arg line='${mount.dir}'/>
-	</exec>
-	<!-- make read-only -->
-	<move file="${build.dir}/${mac.installer}" tofile="${build.dir}/rw.dmg"/>
-	<exec executable="hdiutil" failonerror="true">
-		<arg line='convert ${build.dir}/rw.dmg'/>
-		<arg line='-format UDZO'/>
-		<arg line='-imagekey zlib-level=9'/>
-		<arg line='-o ${build.dir}/${mac.installer}'/>
-	</exec>
-	<delete file="${build.dir}/rw.dmg"/>
-	<!-- add EULA -->
-	<exec executable="hdiutil" failonerror="true">
-		<arg line='unflatten'/>
-		<arg line='${build.dir}/${mac.installer}'/>
-	</exec>
-	<exec executable="/Developer/Tools/DeRez" failonerror="true" output="${build.dir}/sla.r">
-		<arg line='-useDF ${mac.eula}'/>
-	</exec>
-	<exec executable="/Developer/Tools/Rez" failonerror="true">
-		<arg line='-a ${build.dir}/sla.r'/>
-		<arg line='-o ${build.dir}/${mac.installer}'/>
-	</exec>
-	<exec executable="hdiutil" failonerror="true">
-		<arg line='flatten'/>
-		<arg line='${build.dir}/${mac.installer}'/>
-	</exec>
-	<!-- internet-enable -->
-	<exec executable="hdiutil" failonerror="true">
-		<arg line='internet-enable'/>
-		<arg line='${build.dir}/${mac.installer}'/>
-	</exec> 
-	<!-- move diskimage to dist directory -->
-	<move file="${build.dir}/${mac.installer}" tofile="${dist.dir}/${mac.installer}"/>
+    <target name="release-mac" depends="macosx.check" if="MacOSX"
+    		description="Create distribution for Mac OS X">
+		<!-- Background -->
+		<mkdir dir="${project.imageDir}/.background"/>
+    	<copy file="${project.macosx.background}" overwrite="true"
+    		  tofile="${project.imageDir}/.background/background.png"/>
+		<!-- Volume icon -->
+		<copy file="${project.macosx.volumeIcon}" overwrite="true"
+			  tofile="${project.imageDir}/.VolumeIcon.icns"/>
+		<!-- Shortcut to Mac OSX Applications directory -->
+		<exec executable="ln" failonerror="true">
+			<arg line='-s /Applications ${project.imageDir}/Applications'/>
+		</exec>
+		<!-- Update the access and modification times of the files -->
+    	<exec executable="touch" failonerror="true">
+			<arg line='${project.imageDir}'/>
+		</exec>
+    	<record name="${build.logfile}" action="start"/>
+		<!-- Create image -->
+		<exec executable="hdiutil" failonerror="true">
+			<arg line='create'/>
+			<arg line='-srcfolder ${project.imageDir}'/>
+			<arg line='-format UDRW'/>
+			<arg line='-scrub'/>
+			<arg line='-volname ${project.macosx.bundleId}'/>
+			<arg line='${project.buildDir}/app.dmg'/>
+		</exec>
+		<!-- Open image -->
+		<exec executable="hdiutil" failonerror="true">
+			<arg line='attach'/>
+			<arg line='-readwrite'/>
+			<arg line='-noverify'/>
+			<arg line='-noautoopen'/>
+			<arg line='-mountpoint ${project.macosx.mountDir}'/>
+			<arg line='${project.buildDir}/app.dmg'/>
+		</exec>
+		<!-- Make sure root folder is opened when image is -->
+		<exec executable="bless" failonerror="true">
+			<arg line='--folder ${project.macosx.mountDir}'/>
+			<arg line='--openfolder ${project.macosx.mountDir}'/>
+		</exec>
+		<!-- Hack: wait for completion -->
+    	<sleep seconds="1"/>
+		<!-- Position installer items -->
+		<exec executable="osascript" failonerror="true">
+			<arg line='${project.macosx.positionScript}'/>
+			<arg line='${project.macosx.mountDir}'/>
+			<arg line='.background:background.png'/>
+			<arg line='"${project.name}.app"'/>
+		</exec> 
+		<!-- Turn on custom volume icon -->
+		<exec executable="/Developer/Tools/SetFile" failonerror="true">
+			<arg line='-a C'/>
+			<arg line='${project.macosx.mountDir}'/>
+		</exec>
+		<!-- Close image -->
+		<exec executable="hdiutil" failonerror="true">
+			<arg line='detach'/>
+			<arg line='${project.macosx.mountDir}'/>
+		</exec>
+		<!-- Make read-only -->
+		<move file="${project.buildDir}/app.dmg"
+			  tofile="${project.buildDir}/rw.dmg"/>
+		<exec executable="hdiutil" failonerror="true">
+			<arg line='convert ${project.buildDir}/rw.dmg'/>
+			<arg line='-format UDZO'/>
+			<arg line='-imagekey zlib-level=9'/>
+			<arg line='-o ${project.buildDir}/app.dmg'/>
+		</exec>
+		<delete file="${project.buildDir}/rw.dmg"/>
+		<!-- Add EULA -->
+		<exec executable="hdiutil" failonerror="true">
+			<arg line='unflatten'/>
+			<arg line='${project.buildDir}/app.dmg'/>
+		</exec>
+		<exec executable="/Developer/Tools/DeRez" failonerror="true" 
+			  output="${project.buildDir}/sla.r">
+			<arg line='-useDF ${project.macosx.eula}'/>
+		</exec>
+		<exec executable="/Developer/Tools/Rez" failonerror="true">
+			<arg line='-a ${project.buildDir}/sla.r'/>
+			<arg line='-o ${project.buildDir}/app.dmg'/>
+		</exec>
+		<exec executable="hdiutil" failonerror="true">
+			<arg line='flatten'/>
+			<arg line='${project.buildDir}/app.dmg'/>
+		</exec>
+		<!-- Internet-enable diskimage -->
+		<exec executable="hdiutil" failonerror="true">
+			<arg line='internet-enable'/>
+			<arg line='${project.buildDir}/app.dmg'/>
+		</exec> 
+		<!-- Move diskimage to dist directory -->
+		<move file="${project.buildDir}/app.dmg" 
+			  tofile="${project.distDir}/${project.name}_${project.version}.dmg"/>
+    	<!-- Generate checksums -->
+    	<checksums file="${project.distDir}/${project.name}_${project.version}.dmg"/>
+    	<record name="${build.logfile}" action="stop"/>
     </target>
 
     <!-- - - - - - - - - - - - - - - - - - 
             target: macosx.check
     - - - - - - - - - - - - - - - - - -->
-    <target name="macosx.check">
+    <target name="macosx.check" description="Mac OS X platform check">
     	<condition property="MacOSX">
-	  <equals arg1="Mac OS X" arg2="${os.name}"/>
-	</condition>
+	  		<equals arg1="Mac OS X" arg2="${os.name}"/>
+		</condition>
     </target>
 
     <!-- - - - - - - - - - - - - - - - - - 
             target: windows.check
     - - - - - - - - - - - - - - - - - -->
-    <target name="windows.check">
+    <target name="windows.check" description="Windows platform check">
     	<condition property="Windows">
-	  <or>
-	    <os family="windows"/>
-	    <os family="win9x"/>
-	  </or>
-	</condition>
+	  		<or>
+	    		<os family="windows"/>
+	    		<os family="win9x"/>
+	  		</or>
+		</condition>
     </target>
 
     <!-- - - - - - - - - - - - - - - - - - 
-          target: unmount                     
+          target: macosx.unmount                     
     - - - - - - - - - - - - - - - - - -->
-    <target name="unmount" if="mount.dir.present">
+    <target name="macosx.unmount" if="mount.dir.present" 
+    		description="Check if there are old volumes mounted on the system">
     	<!-- make sure any previous image is closed -->
-	<exec executable="hdiutil" failonerror="false" os="Mac OS X">
-		<arg line='unmount'/>
-		<arg line='${mount.dir}'/>
-	</exec>
+		<exec executable="hdiutil" failonerror="false" os="Mac OS X">
+			<arg line='unmount'/>
+			<arg line='${project.macosx.mountDir}'/>
+		</exec>
     </target>
+
+	<!-- - - - - - - - - - - - - - - - - - 
+            macrodef: checksums
+    - - - - - - - - - - - - - - - - - -->
+    <macrodef name="checksums" description="Generate checksums for distribution files">
+    	<attribute name="file"/>                       
+	   	<sequential>
+	   		<checksum file="@{file}" algorithm="MD5" 
+	    			  forceOverwrite="yes"/>
+	    	<checksum file="@{file}" algorithm="SHA" 
+	    			  forceOverwrite="yes" fileext=".asc"/>
+	   	</sequential>
+    </macrodef>
 
     <!-- - - - - - - - - - - - - - - - - - 
             macrodef: updateVersion
     - - - - - - - - - - - - - - - - - -->
-    <macrodef name="updateVersion">
+    <macrodef name="updateVersion" description="Update Mac OS X plist file">
     	<attribute name="replaceFile"/>                       
-   	<sequential>
-      		<replace file="@{replaceFile}" 
-		 propertyFile="build.properties">
-  			<replacefilter token="@VERSION@" property="VERSION"/>
-			<replacefilter token="@COPYRIGHT@" property="COPYRIGHT"/>
-			<replacefilter token="@APPNAME@" property="application.name"/>
-			<replacefilter token="@APPID@" property="application.id"/>
-			<replacefilter token="@BUNDLEID@" property="application.bundleid"/>
-		</replace>
-   	</sequential>
+	   	<sequential>
+	   		<replace file="@{replaceFile}">
+	  			<replacefilter token="@VERSION@" value="${project.version}"/>
+				<replacefilter token="@COPYRIGHT@" value="${project.copyright}"/>
+				<replacefilter token="@APPNAME@" value="${project.name}"/>
+				<replacefilter token="@APPID@" value="${project.air.adt.id}"/>
+				<replacefilter token="@BUNDLEID@" value="${project.macosx.bundleId}"/>
+	   		</replace>
+	   	</sequential>
     </macrodef>
 
     <!-- - - - - - - - - - - - - - - - - - 
             macrodef: updateAirConfig
     - - - - - - - - - - - - - - - - - -->
-    <macrodef name="updateAirConfig">
-    	<attribute name="replaceFile"/>                       
-   	<sequential>
-      		<replace file="@{replaceFile}" 
-		 propertyFile="build.properties">
-			<replacefilter token="@APPDESC@" property="application.desc"/>
-			<replacefilter token="@APPSWF@" property="application.airswf"/>
-			<replacefilter token="@APPFOLDER@" property="application.installFolder"/>
-		</replace>
-   	</sequential>
+    <macrodef name="updateAirConfig" description="Update AIR application descriptor file">
+    	<attribute name="replaceFile"/> 
+    	<sequential>
+    		<replace file="@{replaceFile}">
+				<replacefilter token="@air.runtime.version@" 
+						 value="${project.air.runtime.version}"/>
+		   		<replacefilter token="@air.app.version@" 
+		   			   	 value="${project.version}"/>
+		   		<replacefilter token="@air.id@" 
+		   				 value="${project.air.adt.id}"/>
+		   		<replacefilter token="@air.name@" 
+		   			   	 value="${project.air.adt.name}"/>
+		   		<replacefilter token="@air.title@" 
+		   				 value="${project.air.adt.title}"/>
+		   		<replacefilter token="@air.description@" 
+		   			   	 value="${project.air.adt.description}"/>
+		   		<replacefilter token="@air.copyright@" 
+		   			   	 value="${project.copyright}"/>
+		   		<replacefilter token="@air.systemChrome@" 
+		   			   	 value="${project.air.adt.systemChrome}"/>
+		   		<replacefilter token="@air.transparent@" 
+		   			   	 value="${project.air.adt.transparent}"/>
+		   		<replacefilter token="@air.visible@" 
+		   			   	 value="${project.air.adt.visible}"/>
+		   		<replacefilter token="@air.minimizable@" 
+		   			   	 value="${project.air.adt.minimizable}"/>
+		   		<replacefilter token="@air.maximizable@" 
+		   			   	 value="${project.air.adt.maximizable}"/>
+		   		<replacefilter token="@air.resizable@" 
+		   			   	 value="${project.air.adt.resizable}"/>
+		   		<replacefilter token="@air.width@" 
+		   			   	 value="${project.air.adt.width}"/>
+		   		<replacefilter token="@air.height@" 
+		   			   	 value="${project.air.adt.height}"/>
+		   		<replacefilter token="@air.x@" 
+		   			   	 value="${project.air.adt.x}"/>
+		   		<replacefilter token="@air.y@" 
+		   			   	 value="${project.air.adt.y}"/>
+		   		<replacefilter token="@air.maxSize@" 
+		   			   	 value="${project.air.adt.maxSize}"/>
+		   		<replacefilter token="@air.minSize@" 
+		   			   	 value="${project.air.adt.minSize}"/>
+		   		<replacefilter token="@air.image16x16@" 
+		   			   	 value="${project.buildDir}/icons/${project.air.adt.icon.image16x16}"/>
+		   		<replacefilter token="@air.image32x32@" 
+		   			   	 value="${project.buildDir}/icons/${project.air.adt.icon.image32x32}"/>
+		   		<replacefilter token="@air.image48x48@" 
+		   			   	 value="${project.buildDir}/icons/${project.air.adt.icon.image48x48}"/>
+		   		<replacefilter token="@air.image128x128@" 
+		   				 value="${project.buildDir}/icons/${project.air.adt.icon.image128x128}"/>
+				<replacefilter token="@air.installFolder@" 
+						 value="${project.air.adt.installFolder}"/>
+		   		<replacefilter token="@air.swf@" 
+		   				 value="${project.buildDir}/${project.flex.swfName}.swf"/>
+    		</replace>
+	   	</sequential>
     </macrodef>
 
     <!-- - - - - - - - - - - - - - - - - - 
             macrodef: updateNSIS
     - - - - - - - - - - - - - - - - - -->
-    <macrodef name="updateNSIS">
+    <macrodef name="updateNSIS" description="Update NSIS configuration file">
     	<attribute name="replaceFile"/>                       
-   	<sequential>
-      		<replace file="@{replaceFile}" 
-		 propertyFile="build.properties">
-			<replacefilter token="@VERSION@" property="VERSION"/>
-			<replacefilter token="@APPNAME@" property="application.name"/>
-			<replacefilter token="@HEADING@" property="installer.header"/>
-			<replacefilter token="@LICENSE@" property="license.file"/>
-		</replace>
-   	</sequential>
+   		<sequential>
+	      	<replace file="@{replaceFile}">
+				<replacefilter token="@VERSION@" property="VERSION"/>
+				<replacefilter token="@APPNAME@" property="application.name"/>
+				<replacefilter token="@HEADING@" property="installer.header"/>
+				<replacefilter token="@LICENSE@" property="license.file"/>
+			</replace>
+   		</sequential>
     </macrodef>
+	
+	<!-- - - - - - - - - - - - - - - - - - 
+            scriptdef: getFilesize
+    - - - - - - - - - - - - - - - - - -->
+	<scriptdef name="getFilesize" language="javascript" description="Get size for selected file (in MB)">
+		<attribute name="file"/>
+        <attribute name="property"/>
+        <![CDATA[
+            fileName = attributes.get("file");
+            propName = attributes.get("property");
+
+            file = new java.io.File(fileName);
+            size = file.length()/(1024*1024);
+            
+            project.setNewProperty(propName, size);
+        ]]>
+    </scriptdef>
+
 </project>
