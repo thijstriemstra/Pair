@@ -81,10 +81,6 @@ Author: Thijs Triemstra ( thijs@collab.nl )
     	<delete dir="${project.flex.asdoc.outputDir}" 
     		    		failOnError="false" 
     		    		includeEmptyDirs="true" />
-    	<!-- Remove .cache files created by the Flex 3 beta compiler -->
-    	<delete>
-    	    <fileset dir="flex" includes="**/*.cache"/>
-    	</delete>
     </target>
 	
 	<!-- - - - - - - - - - - - - - - - - - 
@@ -97,6 +93,7 @@ Author: Thijs Triemstra ( thijs@collab.nl )
 		<mkdir dir="${project.reportDir}"/>
     	<mkdir dir="${project.reportDir}/reports"/>
     	<mkdir dir="${project.flex.asdoc.outputDir}"/>
+	<mkdir dir="${project.python.doc.outputDir}"/>
     	<!-- Check for available AIR certificate. -->
     	<available file="${project.air.certificate.file}" property="air.certificate.available"/>
     </target>
@@ -181,6 +178,10 @@ Author: Thijs Triemstra ( thijs@collab.nl )
 					  title="${project.name}"/>
 		</mxmlc>
     	<record name="${build.logfile}" action="stop"/>
+	<!-- Remove .cache files created by the Flex 3 beta compiler -->
+    	<delete>
+    	    <fileset dir="${project.flex.source}" includes="**/*.cache"/>
+    	</delete>
     </target>
 	
 	<!-- - - - - - - - - - - - - - - - - - 
@@ -362,19 +363,21 @@ Author: Thijs Triemstra ( thijs@collab.nl )
 	
     <!-- - - - - - - - - - - - - - - - - - 
             target: python-docs
-    - - - - - - - - - - - - - - - - - -->
+      - - - - - - - - - - - - - - - - - -->
     <target name="python-docs" description="Create API documentation for Python modules">
-    	<record name="${build.logfile}" action="start"/>
-    	<exec executable="pydoc" failonerror="true" dir="${project.python.source}">
-		<arg line='-w'/>
-		<arg line='helloworld'/>
-	</exec>
-    	<move overwrite="true" todir="${project.reportDir}/reports/api/python">
-    		<fileset dir="${project.python.source}" casesensitive="yes">
-    		  <include name="**/*.html"/>
-    		</fileset>
-    	</move>
-    	<record name="${build.logfile}" action="stop"/>
+    	<!--<record name="${build.logfile}" action="start"/>-->
+	<condition property="epydoc.sourcecode" 
+		   value="show-sourcecode"
+		   else="no-sourcecode">
+	  	<equals arg1="yes" arg2="${project.python.doc.sourcecode}"/>
+	</condition>
+	<condition property="epydoc.frames" 
+		   value="show-frames"
+		   else="no-frames">
+	  	<equals arg1="yes" arg2="${project.python.doc.frames}"/>
+	</condition>
+	<epydoc target="helloworld"/>
+    	<!-- <record name="${build.logfile}" action="stop"/> -->
     </target>
 	
     <!-- - - - - - - - - - - - - - - - - - 
@@ -573,6 +576,26 @@ Author: Thijs Triemstra ( thijs@collab.nl )
 	    			  forceOverwrite="yes"/>
 	    	<checksum file="@{file}" algorithm="SHA" 
 	    			  forceOverwrite="yes" fileext=".asc"/>
+	   	</sequential>
+    </macrodef>
+
+    <!-- - - - - - - - - - - - - - - - - - 
+            macrodef: epydoc
+      - - - - - - - - - - - - - - - - - -->
+    <macrodef name="epydoc" description="Execute epydoc">
+    	<attribute name="target"/>                       
+	   	<sequential>
+			<pythonpath/>
+	   		<exec executable="epydoc" failonerror="true" newenvironment="true">
+				<env key="PYTHONPATH" path="${python.build.path}"/>
+				<arg line='@{target}'/>
+				<arg line='--output="${project.python.doc.outputDir}"'/>
+				<arg line='--name="${project.name} API Documentation"'/>
+				<arg line='--url="${project.url}"'/>
+				<arg line='--${project.python.doc.outputType}'/>
+				<arg line='--${epydoc.sourcecode}'/>
+				<arg line='--${epydoc.frames}'/>
+			</exec>
 	   	</sequential>
     </macrodef>
 
