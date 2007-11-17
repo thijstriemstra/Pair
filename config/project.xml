@@ -10,7 +10,7 @@
 	<name>Hello World</name>
 	<description>Simple Hello World application.</description>
 	<language>en</language>
-	<version>0.2</version>
+	<version>0.3.0-dev</version>
 	<url>http://dev.collab.com/pair</url>
 	<copyright>Copyright 2007 The Pair Project. All rights reserved.</copyright>
 	<organization>

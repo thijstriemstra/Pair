@@ -4,6 +4,10 @@ Pair Changelog
 This file contains information about the changes between the different
 versions of Pair.
 
+Pair 0.3  (unreleased)
+------------------------
+Support for AIR Beta 3
+
 Pair 0.2  (2007-11-18)
 ------------------------
 Support for AIR Beta 2 (1.0.M5)
