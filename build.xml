@@ -112,7 +112,7 @@ Author: Thijs Triemstra ( thijs@collab.nl )
     	<copy file="resources/report/css/project.css" overwrite="true"
     		  tofile="${project.reportDir}/css/project.css"/>
     	
-	    <xslt basedir="config" includes="project.xml"
+	    <xslt basedir="${project.configDir}" includes="project.xml"
 	      	  destdir="${project.reportDir}/reports" extension=".html"
 	      	  style="resources/report/xslt/project.xsl" force="true">
 			<param name="timestamp" expression="${formattedTimestamp}"/>
@@ -329,17 +329,26 @@ Author: Thijs Triemstra ( thijs@collab.nl )
 		<arg line='--version'/>
 	</exec>
     	<echo message="Using ${python.version}"/>
+	<pythonpath />
+	<property name="python.resources" value="${basedir}/${project.buildDir}/${project.air.adt.name}.air"/>
+	<property name="mac.frameworks" value="${project.air.runtime.macosx}"/>
+	<condition property="python.includes" value="--includes=${project.python.includes}" else="">
+		<length string="${project.python.includes}" when="greater" length="0" />
+	</condition>
+	<condition property="python.excludes" value="--excludes=${project.python.excludes}" else="">
+	  	<length string="${project.python.excludes}" when="greater" length="0" />
+	</condition>
 	<!-- create application -->
-	<exec executable="python" failonerror="true" dir="${project.python.source}">
+	<exec executable="python" failonerror="true" dir="${project.python.source}" newenvironment="true">
+		<env key="PYTHONPATH" path="${python.build.path}"/>
 		<arg line='setup.py'/>
 		<arg line='py2app'/>
 		<arg line='--plist=${basedir}/${project.buildDir}/${project.macosx.plist}'/>
-		<arg line='--frameworks="${project.air.runtime.macosx}"'/>
+		<arg line='--frameworks=${mac.frameworks}'/>
 		<arg line='--bdist-base=${basedir}/${project.buildDir}'/>
 		<arg line='--dist-dir=${basedir}/${project.imageDir}'/>
 		<arg line='--iconfile=${basedir}/${project.buildDir}/${project.macosx.appIcon}'/>
-		<arg line='--resources="${basedir}/${project.buildDir}/${project.air.adt.name}.air"'/>
-		<arg line='--includes="${project.python.includes}"'/>
+		<arg value='--resources="${python.resources}" ${python.includes} ${python.excludes}'/>
 		<arg line='--optimize=${project.python.optimize}'/>
 		<arg line='--xref'/>
 	</exec>
@@ -640,6 +649,17 @@ Author: Thijs Triemstra ( thijs@collab.nl )
 		   				 value="${project.buildDir}/${project.flex.swfName}.swf"/>
     		</replace>
 	   	</sequential>
+    </macrodef>
+
+    <!-- - - - - - - - - - - - - - - - - - 
+            macrodef: pythonpath
+      - - - - - - - - - - - - - - - - - -->
+    <macrodef name="pythonpath" description="Set PYTHONPATH">                 
+   	<sequential>
+	<property name="python.build.path" 
+	 	  value="${basedir}/${project.python.source}"/>
+	<echo message="PYTHONPATH: ${python.build.path}"/>
+   	</sequential>
     </macrodef>
 
     <!-- - - - - - - - - - - - - - - - - - 

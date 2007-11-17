@@ -6,7 +6,7 @@ versions of Pair.
 
 Pair 0.2  (unreleased)
 ------------------------
-Support for the new beta version of AIR.
+Support for AIR Beta 2 (M5).
 
 New features:
  - Load build settings from project xml configuration file
@@ -15,7 +15,7 @@ New features:
  - Generate general build report (total build time, total filesize)
  - Save build process output to logfile
  - AIR configuration file generated and included in the project configuration file
- - Support for SWC libraries
+ - Generate Python documentation with Epydoc
  - Launch and debug AIR application from the commandline
 
 Pair 0.1  (2007-08-14)

@@ -49,44 +49,54 @@
 						    <td class="alt">Version.</td>
 						  </tr>
 						  <tr>
-						    <th scope="row" abbr="description" class="spec">description</th>
-						    <td><xsl:value-of select="description"/></td>
-						    <td class="spec">Description.</td>
+						    <th scope="row" abbr="url" class="spec">url</th>
+						    <td><xsl:value-of select="url"/></td>
+						    <td class="spec">Project url.</td>
 						  </tr>
 						  <tr>
-						    <th scope="row" abbr="language" class="specalt">language</th>
-						    <td class="hi"><xsl:value-of select="language"/></td>
-						    <td class="alt">Language.</td>
+						    <th scope="row" abbr="description" class="specalt">description</th>
+						    <td class="hi"><xsl:value-of select="description"/></td>
+						    <td class="alt">Description.</td>
 						  </tr>
 						  <tr>
-						    <th scope="row" abbr="license" class="spec">license</th>
-						    <td><xsl:value-of select="license"/></td>
-						    <td class="spec">License file.</td>
+						    <th scope="row" abbr="language" class="spec">language</th>
+						    <td><xsl:value-of select="language"/></td>
+						    <td class="spec">Language.</td>
 						  </tr>
 						  <tr>
-						    <th scope="row" abbr="copyright" class="specalt">copyright</th>
-						    <td class="hi"><xsl:value-of select="copyright"/></td>
-						    <td class="alt">The copyright information for this application.</td>
+						    <th scope="row" abbr="license" class="specalt">license</th>
+						    <td class="hi"><xsl:value-of select="license"/></td>
+						    <td class="alt">License file.</td>
 						  </tr>
 						  <tr>
-						    <th scope="row" abbr="buildDir" class="spec">buildDir</th>
-						    <td><xsl:value-of select="buildDir"/></td>
-						    <td class="spec">Temporary build directory.</td>
+						    <th scope="row" abbr="copyright" class="spec">copyright</th>
+						    <td><xsl:value-of select="copyright"/></td>
+						    <td class="spec">The copyright information for this application.</td>
 						  </tr>
 						  <tr>
-						    <th scope="row" abbr="imageDir" class="specalt">imageDir</th>
-						    <td class="hi"><xsl:value-of select="imageDir"/></td>
-						    <td class="alt">Image content directory.</td>
+						    <th scope="row" abbr="buildDir" class="specalt">buildDir</th>
+						    <td class="hi"><xsl:value-of select="buildDir"/></td>
+						    <td class="alt">Temporary build directory.</td>
 						  </tr>
 						  <tr>
-						    <th scope="row" abbr="distDir" class="spec">distDir</th>
-						    <td><xsl:value-of select="distDir"/></td>
-						    <td class="spec">Distribution directory.</td>
+						    <th scope="row" abbr="imageDir" class="spec">imageDir</th>
+						    <td><xsl:value-of select="imageDir"/></td>
+						    <td class="spec">Image content directory.</td>
 						  </tr>
 						  <tr>
-						    <th scope="row" abbr="reportDir" class="specalt">reportDir</th>
-						    <td class="hi"><xsl:value-of select="reportDir"/></td>
-						    <td class="alt">Build reports directory.</td>
+						    <th scope="row" abbr="distDir" class="specalt">distDir</th>
+						    <td class="hi"><xsl:value-of select="distDir"/></td>
+						    <td class="alt">Distribution directory.</td>
+						  </tr>
+						  <tr>
+						    <th scope="row" abbr="reportDir" class="spec">reportDir</th>
+						    <td><xsl:value-of select="reportDir"/></td>
+						    <td class="spec">Reports directory.</td>
+						  </tr>
+						  <tr>
+						    <th scope="row" abbr="configDir" class="specalt">configDir</th>
+						    <td class="hi"><xsl:value-of select="configDir"/></td>
+						    <td class="alt">Directory with project configuration files.</td>
 						  </tr>
 						</table>
 						
@@ -158,8 +168,29 @@
 						  </tr>
 						</table>
 						
+						<h3><span>Locale</span></h3>
+						<p class="p2"><span>Flex locale settings.</span></p>
+						
+						<table id="mytable" cellspacing="0">
+						  <tr>
+						    <th scope="col" abbr="Tag">Tag</th>
+						    <th scope="col" abbr="Value">Value</th>
+							<th scope="col" abbr="Description">Description</th>
+						  </tr>
+						  <tr>
+						    <th scope="row" abbr="path" class="spec">path</th>
+						    <td><xsl:value-of select="flex/locale/path"/></td>
+						    <td class="spec">Locale root directory.</td>
+						  </tr>
+						  <tr>
+						    <th scope="row" abbr="language" class="specalt">language</th>
+						    <td class="hi"><xsl:value-of select="flex/locale/language"/></td>
+						    <td class="alt">Selected locale language.</td>
+						  </tr>
+						</table>
+
 						<h3><span>Compiler</span></h3>
-						<p class="p2"><span>The <em>amxmlc</em> command-line compiler is used to create AIR compatible SWF files from MXML, AS, and other source files.</span></p>
+						<p class="p3"><span>The <em>amxmlc</em> command-line compiler is used to create AIR compatible SWF files from MXML, AS, and other source files.</span></p>
 						
 						<table id="mytable" cellspacing="0">
 						  <tr>
@@ -200,13 +231,13 @@
 						  <tr>
 						    <th scope="row" abbr="useNetwork" class="spec">useNetwork</th>
 						    <td><xsl:value-of select="flex/compiler/useNetwork"/></td>
-						    <td class="spec">Specifies that the current application uses network services. <br/><br/>When the property is set to false, the application can access the local filesystem (for example, use the XML.load() method with file: URLs) but not network services.</td>
+						    <td class="spec">Specifies that the current application uses network services. <br/><br/>When the property is set to false, the application can access the local filesystem (for example, use the XML.load() method with <code>file:</code> URLs) but not network services.</td>
 						  </tr>
 						</table>
 						
 						<h3><span>Documentation</span></h3>
 						
-						<p class="p3"><span><a href='http://livedocs.adobe.com/flex/201/html/asdoc_127_1.html'>ASDoc</a> is a command-line tool used to create API language reference documentation as HTML pages from the classes in Flex applications.</span></p>
+						<p class="p4"><span><a href='http://livedocs.adobe.com/flex/201/html/asdoc_127_1.html'>ASDoc</a> is a command-line tool used to create API language reference documentation as HTML pages from the classes in Flex applications.</span></p>
 
 						<table id="mytable" cellspacing="0">
 						  <tr>
@@ -222,8 +253,8 @@
 						  <tr>
 						    <th scope="row" abbr="domainExtensions" class="specalt">domainExtensions</th>
 						    <td class="hi"><xsl:value-of select="flex/asdoc/domainExtensions"/></td>
-						    <td class="alt">Class-folders you want to search for classes to be included in the documentation, seperated by spaces ( for example ../com/ ../net/ ).<br/>
-						    To include every .as and .mxml file within your project, just use ../</td>
+						    <td class="alt">Class-folders you want to search for classes to be included in the documentation, seperated by spaces ( for example <code>../com/ ../net/</code> ).<br/>
+						    To include every .as and .mxml file within your project, just use <code>../</code></td>
 						  </tr>
 						  <tr>
 						    <th scope="row" abbr="template" class="spec">template</th>
@@ -256,10 +287,11 @@
 					</div>
 			
 					<div id="air">
-						<p class="p1"><span><a href='http://www.adobe.com/go/air'>Adobe Integrated Runtime</a> (AIR) is a cross-operating system runtime being developed by <a href='http://adobe.com'>Adobe</a> that allows developers to leverage their existing web development skills (Flash, Flex, HTML, JavaScript, Ajax) to build and deploy rich Internet applications (RIAs) to the desktop.<br/><br/>
+						<p class="p1"><span>Adobe Integrated Runtime (<a href='http://www.adobe.com/go/air'>AIR</a>) is a cross-operating system runtime being developed by <a href='http://adobe.com'>Adobe</a> that allows developers to leverage their existing web development skills (Flash, Flex, HTML, JavaScript, Ajax) to build and deploy rich Internet applications (RIAs) to the desktop.<br/><br/>
 								Currently supports the following operating systems:<br/><br/>
-								<li>Microsoft Windows XP SP2 and Windows Vista Ultimate Edition</li>
-								<li>Apple Mac OS 10.4.8 and 10.4.9 (Intel and PowerPC)</li></span></p>
+								<li>Windows 2000 SP4, Windows XP SP2, and Windows Vista Home and Ultimate Edition</li>
+								<li>Mac OS 10.4.7 and above (Intel and PowerPC)</li>
+								<li>Linux support is <a href='http://labs.adobe.com/wiki/index.php/AIR:Developer_FAQ#Does_Adobe_AIR_support_Linux.3F'>expected</a> in Q3 2008</li></span></p>
 						
 						<h3><span>Project</span></h3>
 						<p class="p2"><span>Package settings that determine the identity of the AIR application and its default installation path.</span></p>
@@ -300,18 +332,18 @@
 						  <tr>
 						    <th scope="row" abbr="systemChrome" class="specalt">systemChrome</th>
 						    <td class="hi"><xsl:value-of select="air/adt/systemChrome"/></td>
-						    <td class="alt">If you set this attribute to "standard", system chrome is displayed, and the application has no transparency. If you set it to "none", no system chrome is displayed.</td>
+						    <td class="alt">If you set this attribute to <code>standard</code>, system chrome is displayed, and the application has no transparency. If you set it to <code>none</code>, no system chrome is displayed.</td>
 						  </tr>
 						  <tr>
 						    <th scope="row" abbr="transparent" class="spec">transparent</th>
 						    <td><xsl:value-of select="air/adt/transparent"/></td>
-						    <td class="spec">Set this to "true", and the <em>systemChrome</em> Tag to "none", if you want the application window to support alpha blending.<br/><br/>
-						    The <em>transparent</em> Tag of a window cannot be changed after the window has been created. A window with transparency may draw more slowly and require more memory than otherwise. </td>
+						    <td class="spec">Set this to <code>true</code>, and the <code>systemChrome</code> Tag to <code>none</code>, if you want the application window to support alpha blending.<br/><br/>
+						    The <code>transparent</code> Tag of a window cannot be changed after the window has been created. A window with transparency may draw more slowly and require more memory than otherwise. </td>
 						  </tr>
 						  <tr>
 						    <th scope="row" abbr="visible" class="specalt">visible</th>
 						    <td class="hi"><xsl:value-of select="air/adt/visible"/></td>
-						    <td class="alt">Set this to "false" if you  want to have the main window be hidden when it is first created. The default value is "true".<br/><br/>
+						    <td class="alt">Set this to <code>false</code> if you  want to have the main window be hidden when it is first created. The default value is <code>true</code>.<br/><br/>
 						    				You may want to have the main window hidden initially, and then set its position and size in your application code.</td>
 						  </tr>
 						  <tr>
@@ -357,12 +389,12 @@
 						  <tr>
 						    <th scope="row" abbr="x" class="spec">x</th>
 						    <td><xsl:value-of select="air/adt/x"/></td>
-						    <td class="spec">The x of the initial window of the application.</td>
+						    <td class="spec">The x position of the initial window of the application.</td>
 						  </tr>
 						  <tr>
 						    <th scope="row" abbr="y" class="specalt">y</th>
 						    <td class="hi"><xsl:value-of select="air/adt/y"/></td>
-						    <td class="alt">The y of the initial window of the application.</td>
+						    <td class="alt">The y position of the initial window of the application.</td>
 						  </tr>
 						  
 						</table>
@@ -469,7 +501,7 @@
 						  <tr>
 						    <th scope="row" abbr="type" class="specalt">type</th>
 						    <td class="hi"><xsl:value-of select="air/certificate/type"/></td>
-						    <td class="alt">Type, either "1024-RSA" or "2048-RSA" (without the quotes) for 1024-bit or 2048-bit <a href='http://en.wikipedia.org/wiki/RSA'>RSA</a> keys.</td>
+						    <td class="alt">Type, either <code>1024-RSA</code> or <code>2048-RSA</code> for 1024-bit or 2048-bit <a href='http://en.wikipedia.org/wiki/RSA'>RSA</a> keys.</td>
 						  </tr>
 						  <tr>
 						    <th scope="row" abbr="file" class="spec">file</th>
@@ -498,9 +530,9 @@
 							<th scope="col" abbr="Description">Description</th>
 						  </tr>
 						  <tr>
-						    <th scope="row" abbr="source" class="spec">source</th>
-						    <td><xsl:value-of select="python/source"/></td>
-						    <td class="spec">Source path directory.</td>
+						    <th scope="row" abbr="version" class="spec">version</th>
+						    <td><xsl:value-of select="python/version"/></td>
+						    <td class="spec">Python version number.</td>
 						  </tr>
 						  <tr>
 						    <th scope="row" abbr="includes" class="specalt">includes</th>
@@ -508,17 +540,54 @@
 						    <td class="alt">Module includes.</td>
 						  </tr>
 						  <tr>
-						    <th scope="row" abbr="windows" class="spec">windows</th>
-						    <td><xsl:value-of select="python/windows"/></td>
-						    <td class="spec">Location of the Python interpreter executable (.exe file) for Windows.</td>
+						    <th scope="row" abbr="excludes" class="spec">excludes</th>
+						    <td><xsl:value-of select="python/excludes"/></td>
+						    <td class="spec">Module excludes.</td>
 						  </tr>
 						  <tr>
 						    <th scope="row" abbr="optimize" class="specalt">optimize</th>
 						    <td class="hi"><xsl:value-of select="python/optimize"/></td>
-						    <td class="alt">Python optimization level: 1 for "python -O", 2 for "python -OO", and 0 to disable.</td>
+						    <td class="alt">Python optimization level: <code>1</code> for "python -O", <code>2</code> for "python -OO", and <code>0</code> to disable.</td>
+						  </tr>
+						  <tr>
+						    <th scope="row" abbr="windows" class="spec">windows</th>
+						    <td><xsl:value-of select="python/windows"/></td>
+						    <td class="spec">Location of the Python interpreter executable (.exe file) for Windows.</td>
 						  </tr>
 						</table>
 						
+						<h3><span>Documentation</span></h3>
+						
+						<p class="p2"><span><a href='http://epydoc.sourceforge.net'>Epydoc</a> is a tool for generating API documentation for Python modules, based on their docstrings.</span></p>
+
+						<table id="mytable" cellspacing="0">
+						  <tr>
+						    <th scope="col" abbr="Tag">Tag</th>
+						    <th scope="col" abbr="Value">Value</th>
+							<th scope="col" abbr="Description">Description</th>
+						  </tr>
+						  <tr>
+						    <th scope="row" abbr="outputDir" class="spec">outputDir</th>
+						    <td><xsl:value-of select="python/doc/outputDir"/></td>
+						    <td class="spec">The output directory for the generated HTML documentation files.</td>
+						  </tr>
+						  <tr>
+						    <th scope="row" abbr="outputType" class="specalt">outputType</th>
+						    <td class="hi"><xsl:value-of select="python/doc/outputType"/></td>
+						    <td class="alt">The type of output that should be generated. Should be one of: <code>html</code>, <code>text</code>, <code>latex</code>, <code>dvi</code>, <code>ps</code>, <code>pdf</code>.</td>
+						  </tr>
+						  <tr>
+						    <th scope="row" abbr="frames" class="spec">frames</th>
+						    <td><xsl:value-of select="python/doc/frames"/></td>
+						    <td class="spec">Whether or not to include a frames-based table of contents.</td>
+						  </tr>
+						  <tr>
+						    <th scope="row" abbr="sourcecode" class="specalt">sourcecode</th>
+						    <td class="hi"><xsl:value-of select="python/doc/sourcecode"/></td>
+						    <td class="alt">Whether or not to include syntax highlighted source code in the output (HTML only).</td>
+						  </tr>
+						</table>
+
 						<p/>
 					</div>
 			
