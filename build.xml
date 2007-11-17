@@ -165,6 +165,8 @@ Author: Thijs Triemstra ( thijs@collab.nl )
 			<!-- List of path elements that form the roots of ActionScript class hierarchies. --> 
 			<source-path path-element="${project.flex.compiler.home}/frameworks"/> 
 			<source-path path-element="${project.flex.source}"/> 
+			<!-- Locale -->
+			<source-path path-element="${project.flex.locale.path}/${project.flex.locale.language}"/>
 			<!-- External libraries -->
 			<compiler.library-path dir="${project.flex.libraries}" append="true"> 
 				<include name="**/*.swc"/>
