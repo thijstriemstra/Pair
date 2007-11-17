@@ -365,7 +365,7 @@ Author: Thijs Triemstra ( thijs@collab.nl )
             target: python-docs
       - - - - - - - - - - - - - - - - - -->
     <target name="python-docs" description="Create API documentation for Python modules">
-    	<!--<record name="${build.logfile}" action="start"/>-->
+    	<record name="${build.logfile}" action="start"/>
 	<condition property="epydoc.sourcecode" 
 		   value="show-sourcecode"
 		   else="no-sourcecode">
@@ -377,7 +377,7 @@ Author: Thijs Triemstra ( thijs@collab.nl )
 	  	<equals arg1="yes" arg2="${project.python.doc.frames}"/>
 	</condition>
 	<epydoc target="helloworld"/>
-    	<!-- <record name="${build.logfile}" action="stop"/> -->
+    	<record name="${build.logfile}" action="stop"/>
     </target>
 	
     <!-- - - - - - - - - - - - - - - - - - 

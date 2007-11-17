@@ -4,29 +4,32 @@ Pair Changelog
 This file contains information about the changes between the different
 versions of Pair.
 
-Pair 0.2  (unreleased)
+Pair 0.2  (2007-11-18)
 ------------------------
-Support for AIR Beta 2 (M5).
+Support for AIR Beta 2 (1.0.M5)
 
 New features:
  - Load build settings from project xml configuration file
- - Generate configuration HTML/CSS styled report from the project config file, including documentation for all build settings
+ - Generate configuration HTML/CSS styled report from the project 
+   config file, including documentation for all build settings
  - Create report for Actionscript class dependencies
  - Generate general build report (total build time, total filesize)
  - Save build process output to logfile
- - AIR configuration file generated and included in the project configuration file
+ - AIR configuration file generated and included in the project 
+   configuration file
  - Generate Python documentation with Epydoc
  - Launch and debug AIR application from the commandline
 
 Pair 0.1  (2007-08-14)
 ------------------------
-Initial build scripts and assets for Pair with AIR Beta 1 (M4) support.
+Initial build scripts and assets for Pair with AIR Beta 1 (1.0.M4) 
+support.
 
 Features:
  - Compilation of a simple Flex/AIR application
  - Generates Actionscript documentation
  - AIR application configuration with properties file
- - Creation of Mac OS X distribution file (.dmg file) with custom volume 
-   icon, background image and EULA
+ - Creation of Mac OS X distribution file (.dmg file) with custom 
+   volume icon, background image and EULA
  - Embedded Python interpreter with py2app and py2exe
  - Windows installer with NSIS
