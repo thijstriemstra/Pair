@@ -1,10 +1,10 @@
-Name "Test-nspython"
-OutFile "Test-nspython.exe"
+Name "Pair Bootloader"
+OutFile "bootloader.exe"
 ShowInstDetails show
-ComponentText "select tests"
+ComponentText "Select Python Tests"
 
 ReserveFile "c:\windows\system32\python23.dll"
-ReserveFile "c:\software\pair\pair\trunk\python\test.py"
+ReserveFile "c:\software\pair\pair\trunk\python\bootloader.py"
 
 ;Page components
 ;Page instfiles
@@ -15,7 +15,7 @@ Function .onInit
     InitPluginsDir
     
     File "/oname=$PLUGINSDIR\python23.dll" "c:\windows\system32\python23.dll"
-    File "/oname=$PLUGINSDIR\test.py"      "c:\software\pair\pair\trunk\python\test.py"
+    File "/oname=$PLUGINSDIR\bootloader.py"      "c:\software\pair\pair\trunk\python\bootloader.py"
 FunctionEnd
 
 
@@ -39,8 +39,8 @@ Section "Test exec msgbox"
 SectionEnd
 
 Section "Test exec file"
-    DetailPrint "nsPython::execFile $PLUGINSDIR\test.py"
-    nsPython::execFile "$PLUGINSDIR\test.py"
+    DetailPrint "nsPython::execFile $PLUGINSDIR\bootloader.py"
+    nsPython::execFile "$PLUGINSDIR\bootloader.py"
 
 SectionEnd
 
