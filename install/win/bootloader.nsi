@@ -4,7 +4,7 @@ ShowInstDetails show
 ComponentText "Select Python Tests"
 
 ReserveFile "c:\windows\system32\python23.dll"
-ReserveFile "c:\software\pair\pair\trunk\python\bootloader.py"
+ReserveFile "c:\software\pair\pair\trunk\pair\bootloader.py"
 
 ;Page components
 ;Page instfiles
@@ -15,7 +15,7 @@ Function .onInit
     InitPluginsDir
     
     File "/oname=$PLUGINSDIR\python23.dll" "c:\windows\system32\python23.dll"
-    File "/oname=$PLUGINSDIR\bootloader.py"      "c:\software\pair\pair\trunk\python\bootloader.py"
+    File "/oname=$PLUGINSDIR\bootloader.py" "c:\software\pair\pair\trunk\pair\bootloader.py"
 FunctionEnd
 
 
