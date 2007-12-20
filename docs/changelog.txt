@@ -7,7 +7,6 @@ versions of Pair.
 
 Pair 0.3.0  (unreleased)
 ----------------------------------------------------------------------
-Support for AIR Beta 3.
 
 
 Pair 0.2.0  (2007-11-18)
