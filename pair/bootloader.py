@@ -23,14 +23,21 @@ from pair import util
 
 # Platform support for Windows
 if sys.platform[:3] == 'win':
-    import nsis
-    nsis.log("Windows")
-
+    platform = "Windows"
+    try:
+        import nsis
+        nsis.log(platform)
+    except ImportError:
+        pass
+    
 # Platform support for Mac OSX
 elif sys.platform == 'darwin':
-    print 'Mac OSX'
+    platform = "Mac OSX"
     # 
 
 # Platform support for Unix
 else:
-    print 'Unix'
+    platform = "Unix"
+
+if __name__ == '__main__':
+    print "Pair %s for %s" % (__version__, platform)

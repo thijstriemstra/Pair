@@ -98,7 +98,7 @@ if sys.platform[:3] == 'win':
             else:
                 return True
 
-    _controllers['windows-default'] = Start()
+    _controllers['windows-default'] = Start
     _open = _controllers['windows-default'].open
 
 
