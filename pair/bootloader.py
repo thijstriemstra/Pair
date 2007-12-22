@@ -19,7 +19,7 @@ completed.
 __version__ = '1.0.0'
 
 import sys
-import util
+from pair import util
 
 # Platform support for Windows
 if sys.platform[:3] == 'win':
