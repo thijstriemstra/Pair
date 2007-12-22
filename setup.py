@@ -22,14 +22,12 @@ if sys.platform == 'darwin':
     extra_options = dict(
         setup_requires=['py2app>=0.3.6'],
         app=[mainscript],
-        # Cross-platform applications generally expect sys.argv to
-        # be used for opening files.
-        options=dict(py2app=dict(argv_emulation=True)),
     )
 elif sys.platform == 'win32':
+    import py2exe
     extra_options = dict(
         setup_requires=['py2exe>=0.6.6'],
-        app=[mainscript],
+        console=[dict(script=mainscript)],
     )
 else:
     extra_options = dict(
