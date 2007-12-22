@@ -7,13 +7,13 @@ use_setuptools()
 from setuptools import setup, find_packages
 
 setup(name = "Pair",
-    version = "0.1.0",
+    version = "1.0.0",
     description = "AIR for Python",
     url = "http://dev.collab.com/pair",
     packages = find_packages(exclude=["*.tests"]),
     license = "MIT License",
     classifiers = [
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 2 - Pre-Alpha",
         "Natural Language :: English",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: MIT License",
