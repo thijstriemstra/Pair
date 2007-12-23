@@ -1,14 +1,6 @@
 # Copyright (c) 2007 The Pair Project. All rights reserved.
 # See LICENSE for details.
 
-"""
-Build script for Pair.
-
-@author: U{Thijs Triemstra<mailto:info@collab.nl>}
-@since: December 2007
-@see: U{http://dev.collab.com/pair}
-"""
-
 from ez_setup import use_setuptools
 
 use_setuptools()
@@ -16,15 +8,17 @@ use_setuptools()
 import sys
 from setuptools import setup, find_packages
 
-mainscript = 'pair/bootloader.py'
-
 if sys.platform == 'darwin':
+    mainscript = 'install/mac/startup.py'
+    
     extra_options = dict(
         setup_requires=['py2app>=0.3.6'],
         app=[mainscript],
     )
 elif sys.platform == 'win32':
     import py2exe
+
+    mainscript = 'install/win/startup.py'
     extra_options = dict(
         setup_requires=['py2exe>=0.6.6'],
         console=[dict(script=mainscript)],

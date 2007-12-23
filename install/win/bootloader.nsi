@@ -44,7 +44,7 @@
   ;ReserveFile "..\customerConfig.ini"
   ;ReserveFile "..\priorApp.ini"
   ReserveFile "c:\windows\system32\python23.dll"
-  ReserveFile "..\..\pair\bootloader.py"
+  ReserveFile "startup.py"
   !insertmacro MUI_RESERVEFILE_INSTALLOPTIONS
  
  
@@ -60,8 +60,8 @@
  
 Section "Install a full application" fullInstallSection
 
-  ;DetailPrint "nsPython::execFile $PLUGINSDIR\bootloader.py"
-  ;nsPython::execFile "$PLUGINSDIR\bootloader.py"
+  ;DetailPrint "nsPython::execFile $PLUGINSDIR\startup.py"
+  ;nsPython::execFile "$PLUGINSDIR\startup.py"
 
   ; Version checking logic
   ; This will send out a warning if the same version is already installed
@@ -77,12 +77,12 @@ Section "Install a full application" fullInstallSection
  
   lbl_prev:
   ;MessageBox MB_OK "Previous version: $varPreviousVersion"
-  ; If the variable is equal to 0.1.0, which is the version of this installer,
+  ; If the variable is equal to 1.0.0, which is the version of this installer,
   ; go to lbl_warn, otherwise for to lbl_del
-  StrCmp $varPreviousVersion "0.1.0" lbl_warn lbl_del
+  StrCmp $varPreviousVersion "1.0.0" lbl_warn lbl_del
  
       lbl_warn:
-      ; Ask confirmation to user that they want to install 0.1.0 even though they
+      ; Ask confirmation to user that they want to install 1.0.0 even though they
       ; already have it installed. If they click OK, go to lbl_prevdone, if they click
       ; Cancel, go to lbl_ABORT
       MessageBox MB_OKCANCEL|MB_ICONQUESTION "Existing install is the same version as this installer. The existing install will be removed. Do you want to continue?" IDOK lbl_prevdone IDCANCEL lbl_ABORT
@@ -125,10 +125,10 @@ Section "Install a Patch to an existing app" installPatchSection
  
   lbl_prev:
   ;MessageBox MB_OK "Previous version of app: $varPreviousVersion"
-  ; If the variable is equal to 0.1.0, which is the version of this installer,
+  ; If the variable is equal to 1.0.0, which is the version of this installer,
   ; go to next command (the message box), otherwise for to two commands down (or the CreateDirectory)
-  StrCmp $varPreviousVersion "0.1.0" "+1" "+2"
-  ; Ask confirmation to user that they want to install 0.1.0 even though they
+  StrCmp $varPreviousVersion "1.0.0" "+1" "+2"
+  ; Ask confirmation to user that they want to install 1.0.0 even though they
   ; already have it installed. If they click OK, go to lbl_prevdone, if they click
   ; Cancel, go to lbl_ABORT
   MessageBox MB_OKCANCEL|MB_ICONQUESTION "Existing install is the same version as this installer. Do you want to continue?" IDOK lbl_prevdone IDCANCEL lbl_ABORT
@@ -168,7 +168,7 @@ Function .onInit
     ;InitPluginsDir
     
     ;File "/oname=$PLUGINSDIR\python23.dll" "c:\windows\system32\python23.dll"
-    ;File "/oname=$PLUGINSDIR\bootloader.py" "c:\software\pair\pair\trunk\pair\bootloader.py"
+    ;File "/oname=$PLUGINSDIR\startup.py" "startup.py"
 
     ;==============================================================
     ; Mutually exclusive functions
