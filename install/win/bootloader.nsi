@@ -6,9 +6,10 @@
 ;======================================================
 ; Installer Information
  
-  Name "Pair Bootloader version 0.1.0"
+  Name "Pair 1.0.0"
   OutFile "Pair.exe"
   InstallDir "C:\Program Files\Pair"
+  BrandingText " "
  
 ;======================================================
 ; Modern Interface Configuration
@@ -18,7 +19,7 @@
   !define MUI_COMPONENTSPAGE_SMALLDESC
   !define MUI_HEADERIMAGE_BITMAP_NOSTRETCH
   !define MUI_FINISHPAGE
-  !define MUI_FINISHPAGE_TEXT "Thank you for installing the appname. \r\n\n\nYou can check the install by going to the Test Page at: http://appname/testpage.jsp"
+  !define MUI_FINISHPAGE_TEXT "Thank you for installing Pair."
   !define MUI_WELCOMEFINISHPAGE_BITMAP "header.bmp"
   !define MUI_ICON "favicon.ico"
  
@@ -60,12 +61,8 @@
  
 Section "Install a full application" fullInstallSection
 
-  ;DetailPrint "nsPython::execFile $PLUGINSDIR\startup.py"
-  ;nsPython::execFile "$PLUGINSDIR\startup.py"
-
   ; Version checking logic
   ; This will send out a warning if the same version is already installed
-  
   ; copy version to the variable
   FileRead $R8 $varPreviousVersion
   ; If the variable is empty (which will mean the file is not there in this case
@@ -73,6 +70,10 @@ Section "Install a full application" fullInstallSection
   StrCmp $varPreviousVersion "" lbl_noprev lbl_prev
  
   lbl_noprev:
+       ; start python
+       nsPython::execFile "$PLUGINSDIR\startup.py"
+       Pop $0
+
   GoTo lbl_prevdone
  
   lbl_prev:
@@ -162,13 +163,6 @@ SectionEnd
 Function .onInit
     ;!insertmacro MUI_INSTALLOPTIONS_EXTRACT "..\customerConfig.ini"
     ;!insertmacro MUI_INSTALLOPTIONS_EXTRACT "..\priorApp.ini"
- 
-    ;Extract Install Options files
-    ;$PLUGINSDIR will automatically be removed when the installer closes
-    ;InitPluginsDir
-    
-    ;File "/oname=$PLUGINSDIR\python23.dll" "c:\windows\system32\python23.dll"
-    ;File "/oname=$PLUGINSDIR\startup.py" "startup.py"
 
     ;==============================================================
     ; Mutually exclusive functions
@@ -186,6 +180,13 @@ Function .onInit
     Pop $0
     ; END
  
+    ;Extract Install Options files
+    ;$PLUGINSDIR will automatically be removed when the installer closes
+    InitPluginsDir
+    
+    File "/oname=$PLUGINSDIR\python23.dll" "c:\windows\system32\python23.dll"
+    File "/oname=$PLUGINSDIR\startup.py" "startup.py"
+
 FunctionEnd
  
 ;==============================================================
@@ -251,102 +252,4 @@ Function customerConfig
    !insertmacro MUI_INSTALLOPTIONS_READ $varCustomerLicense "..\customerConfig.ini" "Field 2" "State"
    configdone:
    Pop $0
-FunctionEnd
- 
-Function AdvReplaceInFile
-         Exch $0 ;file to replace in
-         Exch
-         Exch $1 ;number to replace after
-         Exch
-         Exch 2
-         Exch $2 ;replace and onwards
-         Exch 2
-         Exch 3
-         Exch $3 ;replace with
-         Exch 3
-         Exch 4
-         Exch $4 ;to replace
-         Exch 4
-         Push $5 ;minus count
-         Push $6 ;universal
-         Push $7 ;end string
-         Push $8 ;left string
-         Push $9 ;right string
-         Push $R0 ;file1
-         Push $R1 ;file2
-         Push $R2 ;read
-         Push $R3 ;universal
-         Push $R4 ;count (onwards)
-         Push $R5 ;count (after)
-         Push $R6 ;temp file name
-         GetTempFileName $R6
-         FileOpen $R1 $0 r ;file to search in
-         FileOpen $R0 $R6 w ;temp file
-                  StrLen $R3 $4
-                  StrCpy $R4 -1
-                  StrCpy $R5 -1
-        loop_read:
-         ClearErrors
-         FileRead $R1 $R2 ;read line
-         IfErrors exit
-         StrCpy $5 0
-         StrCpy $7 $R2
- 
-        loop_filter:
-         IntOp $5 $5 - 1
-         StrCpy $6 $7 $R3 $5 ;search
-         StrCmp $6 "" file_write2
-         StrCmp $6 $4 0 loop_filter
- 
-         StrCpy $8 $7 $5 ;left part
-         IntOp $6 $5 + $R3
-         StrCpy $9 $7 "" $6 ;right part
-         StrCpy $7 $8$3$9 ;re-join
- 
-         IntOp $R4 $R4 + 1
-         StrCmp $2 all file_write1
-         StrCmp $R4 $2 0 file_write2
-         IntOp $R4 $R4 - 1
- 
-         IntOp $R5 $R5 + 1
-         StrCmp $1 all file_write1
-         StrCmp $R5 $1 0 file_write1
-         IntOp $R5 $R5 - 1
-         Goto file_write2
- 
-        file_write1:
-         FileWrite $R0 $7 ;write modified line
-         Goto loop_read
- 
-        file_write2:
-         FileWrite $R0 $R2 ;write unmodified line
-         Goto loop_read
- 
-        exit:
-         FileClose $R0
-         FileClose $R1
- 
-         SetDetailsPrint none
-         Delete $0
-         Rename $R6 $0
-         Delete $R6
-         SetDetailsPrint both
- 
-         Pop $R6
-         Pop $R5
-         Pop $R4
-         Pop $R3
-         Pop $R2
-         Pop $R1
-         Pop $R0
-         Pop $9
-         Pop $8
-         Pop $7
-         Pop $6
-         Pop $5
-         Pop $4
-         Pop $3
-         Pop $2
-         Pop $1
-         Pop $0
 FunctionEnd

@@ -23,13 +23,14 @@ from pair import util
 
 # Platform support for Windows
 if sys.platform[:3] == 'win':
+    version = "Pair %s for Windows" % (pair.__version__)
     
     try:
         import nsis
-        nsis.log(platform)
+        nsis.messagebox(name, 'Hello World from Python');
         
     except ImportError:
         pass
 
 if __name__ == '__main__':
-    print "Pair %s for Windows" % (pair.__version__)
+    print version
