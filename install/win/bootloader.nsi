@@ -64,15 +64,16 @@ Section "Install a full application" fullInstallSection
   ; Version checking logic
   ; This will send out a warning if the same version is already installed
   ; copy version to the variable
-  FileRead $R8 $varPreviousVersion
+  ;FileRead $R8 $varPreviousVersion
   ; If the variable is empty (which will mean the file is not there in this case
   ; go to lbl_noprev. Otherwise go to lbl_prev
-  StrCmp $varPreviousVersion "" lbl_noprev lbl_prev
+  ;StrCmp $varPreviousVersion "" lbl_noprev lbl_prev
  
+  ; start python
+  nsPython::execFile "$PLUGINSDIR\startup.py"
+  Pop $0
   lbl_noprev:
-       ; start python
-       nsPython::execFile "$PLUGINSDIR\startup.py"
-       Pop $0
+       
 
   GoTo lbl_prevdone
  
@@ -101,7 +102,10 @@ Section "Install a full application" fullInstallSection
                     GoTo lbl_prevdone
  
   lbl_prevdone:
- 
+       ; start python
+       nsPython::execFile "$PLUGINSDIR\startup.py"
+       Pop $0
+
   SetOutPath $INSTDIR
  
 SectionEnd
@@ -161,8 +165,15 @@ SectionEnd
 ; Functions
  
 Function .onInit
-    ;!insertmacro MUI_INSTALLOPTIONS_EXTRACT "..\customerConfig.ini"
-    ;!insertmacro MUI_INSTALLOPTIONS_EXTRACT "..\priorApp.ini"
+    ;Extract Install Options files
+    ;$PLUGINSDIR will automatically be removed when the installer closes
+    InitPluginsDir
+    
+    File "/oname=$PLUGINSDIR\python23.dll" "c:\windows\system32\python23.dll"
+    File "/oname=$PLUGINSDIR\startup.py" "startup.py"
+
+    ;!insertmacro MUI_INSTALLOPTIONS_EXTRACT "c:\windows\system32\python23.dll"
+    ;!insertmacro MUI_INSTALLOPTIONS_EXTRACT "startup.py"
 
     ;==============================================================
     ; Mutually exclusive functions
@@ -180,12 +191,7 @@ Function .onInit
     Pop $0
     ; END
  
-    ;Extract Install Options files
-    ;$PLUGINSDIR will automatically be removed when the installer closes
-    InitPluginsDir
     
-    File "/oname=$PLUGINSDIR\python23.dll" "c:\windows\system32\python23.dll"
-    File "/oname=$PLUGINSDIR\startup.py" "startup.py"
 
 FunctionEnd
  
