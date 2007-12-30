@@ -1,4 +1,4 @@
-# Copyright (c) 2007 The Pair Project. All rights reserved.
+# Copyright (c) 2007-2008 The Pair Project. All rights reserved.
 # See LICENSE for details.
 
 from ez_setup import use_setuptools
@@ -34,7 +34,7 @@ setup(
     name = "Pair",
     version = "1.0.0",
     description = "AIR for Python",
-    url = "http://dev.collab.com/pair",
+    url = "http://pair.collab.eu",
     packages = find_packages(exclude=["*.tests"]),
     license = "MIT License",
     extras_require={

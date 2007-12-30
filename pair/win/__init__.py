@@ -2,11 +2,6 @@
 # See LICENSE for details.
 
 """
-Pair: Python for the Adobe Integrated Runtime.
-
 @author: U{Thijs Triemstra<mailto:info@collab.nl>}
-@since: December 2007
-@see: U{http://pair.collab.eu}
+@since: 1.0.0
 """
-
-__version__ = '1.0.0'

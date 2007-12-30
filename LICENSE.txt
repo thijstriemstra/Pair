@@ -1,4 +1,4 @@
-Copyright (c) The Pair Project, 2007
+Copyright (c) The Pair Project, 2007-2008
 
 Thijs Triemstra
 
