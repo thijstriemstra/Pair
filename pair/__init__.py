@@ -2,7 +2,7 @@
 # See LICENSE for details.
 
 """
-Pair: Python for the Adobe Integrated Runtime.
+Pair: Python for the Adobe Integrated Runtime (AIR).
 
 @author: U{Thijs Triemstra<mailto:info@collab.nl>}
 
@@ -10,7 +10,7 @@ Pair: Python for the Adobe Integrated Runtime.
 @contact: U{pair@collab.eu<mailto:pair@collab.eu>}
 @see: U{http://pair.collab.eu}
 
-@since: December 2007
+@since: July 2007
 @status: Pre-Alpha
 """
 
