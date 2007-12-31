@@ -1,3 +1,6 @@
+# Copyright (c) 2007-2008 The Pair Project. All rights reserved.
+# See LICENSE for details.
+
 '''
 Utilities for:
 

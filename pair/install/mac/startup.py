@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright (c) 2007 The Pair Project. All rights reserved.
+# Copyright (c) 2007-2008 The Pair Project. All rights reserved.
 # See LICENSE for details.
 
 '''
