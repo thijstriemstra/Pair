@@ -37,17 +37,17 @@ setup(
     url = "http://pair.collab.eu",
     packages = find_packages(exclude=["*.tests"]),
     install_requires = ["buildbot>=0.7.6", "Twisted>=2.5.0", "PyAMF>=0.1.0a"],
-    license = "MIT License",
+    license = "GNU General Public License (GPL)",
     entry_points={
         'console_scripts': [
-            'pair = pair.scripts.control:main',
+            'pair = pair.scripts.cmd:run',
         ],
     },
     classifiers = [
         "Development Status :: 2 - Pre-Alpha",
         "Natural Language :: English",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: MIT License",
+        "License :: OSI Approved :: GNU General Public License (GPL)",
         "Operating System :: OS Independent",
         "Programming Language :: Python",
         "Topic :: Software Development :: Libraries :: Python Modules",
