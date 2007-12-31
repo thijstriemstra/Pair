@@ -11,6 +11,7 @@ class PairMaker(runner.Maker):
    
     def makeTAC(self, contents, secret=False):
         tacfile = "pair.tac"
+        
         if os.path.exists(tacfile):
             oldcontents = open(tacfile, "rt").read()
             if oldcontents == contents:
@@ -21,30 +22,44 @@ class PairMaker(runner.Maker):
                 print "not touching existing", tacfile
                 print "creating %s.new instead" % tacfile
             tacfile = "%s.new" % tacfile
+            
         f = open(tacfile, "wt")
         f.write(contents)
         f.close()
         if secret:
             os.chmod(tacfile, 0600)
 
-    def public_html(self, index_html, buildbot_css, robots_txt):
+    def public_html(self, index_html, pair_css, dependencies_css, robots_txt):
+        """
+        """
         webdir = os.path.join(self.basedir, "public_html")
+        cssdir = os.path.join(webdir, "css")
+        imagesdir = os.path.join(webdir, "images")
+        
         if os.path.exists(webdir):
             if not self.quiet:
                 print "public_html/ already exists: not replacing"
             return
         else:
             os.mkdir(webdir)
+            os.mkdir(cssdir)
+            os.mkdir(imagesdir)
         if not self.quiet:
             print "populating public_html/"
+            
         target = os.path.join(webdir, "index.html")
         f = open(target, "wt")
         f.write(open(index_html, "rt").read())
         f.close()
 
-        target = os.path.join(webdir, "pair.css")
+        target = os.path.join(cssdir, "pair.css")
         f = open(target, "wt")
-        f.write(open(buildbot_css, "rt").read())
+        f.write(open(pair_css, "rt").read())
+        f.close()
+
+        target = os.path.join(cssdir, "dependencies.css")
+        f = open(target, "wt")
+        f.write(open(dependencies_css, "rt").read())
         f.close()
 
         target = os.path.join(webdir, "robots.txt")
@@ -52,16 +67,26 @@ class PairMaker(runner.Maker):
         f.write(open(robots_txt, "rt").read())
         f.close()
 
-    def upgrade_public_html(self, index_html, buildbot_css, robots_txt):
+    def upgrade_public_html(self, index_html, pair_css, dependencies_css, robots_txt):
+        """
+        """
         webdir = os.path.join(self.basedir, "public_html")
+        cssdir = os.path.join(webdir, "css")
+        imagesdir = os.path.join(webdir, "images")
+        
         if not os.path.exists(webdir):
             if not self.quiet:
                 print "populating public_html/"
             os.mkdir(webdir)
+            os.mkdir(cssdir)
+            os.mkdir(imagesdir)
+            
         self.populate_if_missing(os.path.join(webdir, "index.html"),
                                  index_html)
-        self.populate_if_missing(os.path.join(webdir, "pair.css"),
-                                 buildbot_css)
+        self.populate_if_missing(os.path.join(cssdir, "pair.css"),
+                                 pair_css)
+        self.populate_if_missing(os.path.join(cssdir, "dependencies.css"),
+                                 dependencies_css)
         self.populate_if_missing(os.path.join(webdir, "robots.txt"),
                                  robots_txt)
 
@@ -122,12 +147,11 @@ class UpgradeMasterOptions(runner.UpgradeMasterOptions):
 def upgradeMaster(config):
     basedir = config['basedir']
     m = PairMaker(config)
-    # TODO: check Makefile
-    # TODO: check TAC file
-    # check web files: index.html, classic.css, robots.txt
+    # check web files
     webdir = os.path.join(basedir, "public_html")
     m.upgrade_public_html(util.sibpath(__file__, "../web/index.html"),
-                          util.sibpath(__file__, "../web/pair.css"),
+                          util.sibpath(__file__, "../web/css/pair.css"),
+                          util.sibpath(__file__, "../web/css/dependencies.css"),
                           util.sibpath(__file__, "../web/robots.txt"),
                           )
     m.populate_if_missing(os.path.join(basedir, "master.cfg.sample"),
@@ -144,15 +168,6 @@ class MasterOptions(runner.MasterOptions):
     
     def getSynopsis(self):
         return "Usage:    pair create-master [options] <basedir>"
-
-    longdesc = """
-    This command creates a buildmaster working directory and pair.tac
-    file. The master will live in <dir> and create various files there.
-
-    At runtime, the master will read a configuration file (named
-    'master.cfg' by default) in its basedir. This file should contain python
-    code which eventually defines a dictionary named 'BuildmasterConfig'.
-    The elements of this dictionary are used to configure the Buildmaster."""
 
 masterTAC = """
 from twisted.application import service
@@ -174,7 +189,8 @@ def createMaster(config):
     m.makeTAC(contents)
     m.sampleconfig(util.sibpath(__file__, "sample.cfg"))
     m.public_html(util.sibpath(__file__, "../web/index.html"),
-                  util.sibpath(__file__, "../web/classic.css"),
+                  util.sibpath(__file__, "../web/css/pair.css"),
+                  util.sibpath(__file__, "../web/css/dependencies.css"),
                   util.sibpath(__file__, "../web/robots.txt"),
                   )
 
@@ -182,17 +198,6 @@ def createMaster(config):
 
 class SlaveOptions(runner.SlaveOptions):
     
-    longdesc = """
-    This command creates a buildslave working directory and pair.tac
-    file. The bot will use the <name> and <passwd> arguments to authenticate
-    itself when connecting to the master. All commands are run in a
-    build-specific subdirectory of <basedir>. <master> is a string of the
-    form 'hostname:port', and specifies where the buildmaster can be reached.
-
-    <name>, <passwd>, and <master> will be provided by the buildmaster
-    administrator for your bot. You must choose <basedir> yourself.
-    """
-
     def getSynopsis(self):
         return "Usage:    pair create-slave [options] <basedir> <master> <name> <passwd>"
 
@@ -237,12 +242,6 @@ def createSlave(config):
     m.mkinfo()
 
     if not m.quiet: print "buildslave configured in %s" % m.basedir
-
-def createProject(conf):
-    master = createMaster(conf)
-    slave = createSlave(conf)
-
-    if not m.quiet: print "project configured in %s" % master.basedir
 
 def restart(config):
     quiet = config['quiet']
@@ -338,85 +337,35 @@ class RestartOptions(runner.MakerBase):
     def getSynopsis(self):
         return "Usage:    pair restart <basedir>"
 
-class DebugClientOptions(usage.Options):
-    optFlags = [
-        ['help', 'h', "Display this message"],
-        ]
-    optParameters = [
-        ["master", "m", None,
-         "Location of the buildmaster's slaveport (host:port)"],
-        ["passwd", "p", None, "Debug password to use"],
-        ]
-
-    def parseArgs(self, *args):
-        if len(args) > 0:
-            self['master'] = args[0]
-        if len(args) > 1:
-            self['passwd'] = args[1]
-        if len(args) > 2:
-            raise usage.UsageError("I wasn't expecting so many arguments")
-
-class StatusClientOptions(usage.Options):
-    optFlags = [
-        ['help', 'h', "Display this message"],
-        ]
-    optParameters = [
-        ["master", "m", None,
-         "Location of the buildmaster's status port (host:port)"],
-        ]
-
-    def parseArgs(self, *args):
-        if len(args) > 0:
-            self['master'] = args[0]
-        if len(args) > 1:
-            raise usage.UsageError("I wasn't expecting so many arguments")
-
 class SendChangeOptions(runner.SendChangeOptions):
     def getSynopsis(self):
         return "Usage:    pair sendchange [options] filenames.."
-
-class ForceOptions(usage.Options):
-    optParameters = [
-        ["builder", None, None, "which Builder to start"],
-        ["branch", None, None, "which branch to build"],
-        ["revision", None, None, "which revision to build"],
-        ["reason", None, None, "the reason for starting the build"],
-        ]
-
-    def parseArgs(self, *args):
-        args = list(args)
-        if len(args) > 0:
-            if self['builder'] is not None:
-                raise usage.UsageError("--builder provided in two ways")
-            self['builder'] = args.pop(0)
-        if len(args) > 0:
-            if self['reason'] is not None:
-                raise usage.UsageError("--reason provided in two ways")
-            self['reason'] = " ".join(args)
-
 
 class TryOptions(runner.TryOptions):
     
     def getSynopsis(self):
         return "Usage:    pair try [options]"
 
-class TryServerOptions(usage.Options):
-    optParameters = [
-        ["jobdir", None, None, "the jobdir (maildir) for submitting jobs"],
-        ]
-
 class Options(usage.Options):
+    
     import pair
-
-    version = pair.__version__
+    import buildbot
+    import pyamf
+    
+    buildbot_version = buildbot.version
+    pair_version = pair.__version__
+    pyamf_version = pyamf.__version__[:3]
+        
     synopsis = "Usage:    pair <command> [command options]"
 
     subCommands = [
         # the following are all admin commands
+        
         ['create-master', None, MasterOptions,
          "Create and populate a directory for a new buildmaster"],
         ['upgrade-master', None, UpgradeMasterOptions,
          "Upgrade an existing buildmaster directory for the current version"],
+        
         ['create-slave', None, SlaveOptions,
          "Create and populate a directory for a new buildslave"],
         ['start', None, StartOptions, "Start a buildmaster or buildslave"],
@@ -430,10 +379,10 @@ class Options(usage.Options):
         ['sendchange', None, SendChangeOptions,
          "Send a change to the buildmaster"],
 
-        ['statuslog', None, StatusClientOptions,
+        ['statuslog', None, runner.StatusClientOptions,
          "Emit current builder status to stdout"],
         
-        ['statusgui', None, StatusClientOptions,
+        ['statusgui', None, runner.StatusClientOptions,
          "Display a small window showing current builder status"],
 
         ['try', None, TryOptions, "Run a build with your local changes"],
@@ -441,7 +390,9 @@ class Options(usage.Options):
         ]
 
     def opt_version(self):
-        print "Pair version: %s" % Options.version
+        print "Pair version:", Options.pair_version
+        print "PyAMF version:", Options.pyamf_version
+        print "Buildbot version:", Options.buildbot_version
         usage.Options.opt_version(self)
 
     def opt_verbose(self):
@@ -459,8 +410,7 @@ def run():
     except usage.error, e:
         print "%s:  %s" % (sys.argv[0], e)
         print
-        import pair
-        print "Pair %s" % Options.version
+        print "Pair %s" % Options.pair_version
         print
         c = getattr(config, 'subOptions', config)
         print str(c)
@@ -476,7 +426,7 @@ def run():
     elif command == "create-slave":
         createSlave(so)
     elif command == "start":
-        from buildbot.scripts.startup import start
+        from pair.scripts.startup import start
         start(so)
     elif command == "stop":
         runner.stop(so, wait=True)
