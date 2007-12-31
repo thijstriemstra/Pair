@@ -36,9 +36,12 @@ setup(
     description = "AIR for Python",
     url = "http://pair.collab.eu",
     packages = find_packages(exclude=["*.tests"]),
+    install_requires = ["buildbot>=0.7.6", "Twisted>=2.5.0", "PyAMF>=0.1.0a"],
     license = "MIT License",
-    extras_require={
-        'wsgi': ['wsgiref']
+    entry_points={
+        'console_scripts': [
+            'pair = pair.scripts.control:main',
+        ],
     },
     classifiers = [
         "Development Status :: 2 - Pre-Alpha",

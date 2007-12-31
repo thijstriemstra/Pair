@@ -1,0 +1,4 @@
+#!/usr/bin/python
+
+from pair.scripts import cmd
+cmd.run()
