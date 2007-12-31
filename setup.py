@@ -40,7 +40,7 @@ setup(
     license = "GNU General Public License (GPL)",
     entry_points={
         'console_scripts': [
-            'pair = pair.scripts.cmd:run',
+            'pair = pair.scripts.start:run',
         ],
     },
     classifiers = [

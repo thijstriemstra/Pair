@@ -1,4 +1,4 @@
 #!/usr/local/bin/python
 
-from pair.scripts import cmd
-cmd.run()
+from pair.scripts import start
+start.run()
