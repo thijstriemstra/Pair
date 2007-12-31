@@ -1,0 +1,86 @@
+body {
+	text-align:left;
+	padding:20;
+	margin:1px 0 0;
+	font:normal 12px Arial, Helvetica, Sans-serif;
+}
+
+a {
+	color:#000000;
+}
+
+a:hover {
+	color:#A77749;
+}
+
+#container {
+	text-align:left;
+	width:900px;	
+	margin:auto;
+	position:relative;
+	padding:0;
+}
+
+#mytable {
+	border-left: 1px solid #C1DAD7;
+	width: 900px;
+	padding: 0;
+	margin: 0;
+}
+
+th {
+	font: bold 11px Arial, Helvetica, sans-serif;
+	border-right: 1px solid #C1DAD7;
+	border-bottom: 1px solid #C1DAD7;
+	border-top: 1px solid #C1DAD7;
+	text-align: left;
+	padding: 4px 4px 4px 8px;
+	background: #f5fafa;
+	color: #5B6765;
+}
+
+td {
+	font: normal 12px Arial, Helvetica, sans-serif;
+	border-right: 1px solid #C1DAD7;
+	border-bottom: 1px solid #C1DAD7;
+	background: #fff;
+	padding: 3px 3px 3px 6px;
+	color: #000000;
+}
+
+td.hi {
+	font: normal 12px Arial, Helvetica, sans-serif;
+	background: #F5FAFA;
+	color: #000000;
+}
+
+td.alt {
+	font: 12px Arial, Helvetica, sans-serif;
+	background: #F5FAFA;
+	color: #000000;
+}
+
+td.spec {
+	border-top: 0;
+	background: #fff;
+	font: 12px Arial, Helvetica, sans-serif;
+	color: #000000;
+}
+
+th.spec {
+	border-top: 0;
+	background: #fff;
+	font: 12px Arial, Helvetica, sans-serif;
+	color: #000000;
+}
+
+th.specalt {
+	border-top: 0;
+	background: #f5fafa;
+	font: 12px Arial, Helvetica, sans-serif;
+	color: #000000;
+}
+
+li {
+	padding: 3px 0px 0px 0px;
+}
