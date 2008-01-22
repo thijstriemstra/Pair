@@ -52,21 +52,13 @@ class Maker(object):
             
         os.mkdir(self.basedir)
 
-    def init_env(self):
+    def init_env(self, cfg, air, python, install):
         """
         Create and populate a directory for a new project.
         """
-        self.sample_config(util.sibpath(__file__, "templates/sample.cfg"))
-
-        self.sample_air(util.sibpath(__file__, "templates/air"))
-
-        self.sample_python(util.sibpath(__file__, "templates/python"))
-        
-        #util.sibpath(__file__, "templates/html/index.html"),
-        #
-        #util.sibpath(__file__, "templates/images"),
-        #util.sibpath(__file__, "templates/air"),
-        #util.sibpath(__file__, "templates/air"),
+        self.sample_config(cfg)
+        self.sample_air(air)
+        self.sample_python(python)
 
     def sample_config(self, source):
         """
@@ -105,6 +97,11 @@ class Maker(object):
         @type source: string
         """
         airdir = os.path.join(self.basedir, "air")
+        srcdir = os.path.join(self.basedir, "air/src/eu/collab/pair")
+        libdir = os.path.join(self.basedir, "air/lib")
+        cssdir = os.path.join(self.basedir, "air/resources/css")
+        imgdir = os.path.join(self.basedir, "air/resources/images")
+        locdir = os.path.join(self.basedir, "air/resources/locale/en_US")
         
         if os.path.exists(airdir):
             if not self.quiet:
@@ -113,9 +110,13 @@ class Maker(object):
         else:
             if not self.quiet:
                 print "Populating air/"
-            # copy source dir to new airdir
-            os.mkdir(airdir)
-
+                
+            os.makedirs(srcdir)
+            os.makedirs(libdir)
+            os.makedirs(cssdir)
+            os.mkdir(imgdir)
+            os.makedirs(locdir)
+            
     def sample_python(self, source):
         """
         Generate sample Python source files for the new project.
@@ -281,7 +282,10 @@ def createEnvironment(config):
     m = Maker(config)
     m.mkdir()
     m.chdir()    
-    m.init_env()
+    m.init_env(util.sibpath(__file__, 'templates/sample.cfg'),
+               util.sibpath(__file__, 'templates/air'),
+               util.sibpath(__file__, 'templates/python'),
+               util.sibpath(__file__, 'templates/installer'))
 
     if not m.quiet:
         print "Project configured in %s" % m.basedir
