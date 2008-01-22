@@ -52,9 +52,25 @@ class Maker(object):
             
         os.mkdir(self.basedir)
 
-    def sampleconfig(self, source):
+    def init_env(self):
         """
-        Generate sample configuration file.
+        Create and populate a directory for a new project.
+        """
+        self.sample_config(util.sibpath(__file__, "templates/sample.cfg"))
+
+        self.sample_air(util.sibpath(__file__, "templates/air"))
+
+        self.sample_python(util.sibpath(__file__, "templates/python"))
+        
+        #util.sibpath(__file__, "templates/html/index.html"),
+        #
+        #util.sibpath(__file__, "templates/images"),
+        #util.sibpath(__file__, "templates/air"),
+        #util.sibpath(__file__, "templates/air"),
+
+    def sample_config(self, source):
+        """
+        Generate sample project configuration file.
 
         @param source: Path to sample.cfg file.
         @type source: string
@@ -78,45 +94,64 @@ class Maker(object):
         f.write(config_sample)
         f.close()
         os.chmod(target, 0600)
-
-    def public_html(self, index_html, pair_css, dependencies_css, robots_txt):
-        """
-        """
-        webdir = os.path.join(self.basedir, "public_html")
-        cssdir = os.path.join(webdir, "css")
-        imagesdir = os.path.join(webdir, "images")
         
-        if os.path.exists(webdir):
+    def sample_air(self, source):
+        """
+        Generate sample AIR source and config files for the new project.
+
+        Includes the CommandProxy ActionScript library.
+
+        @param source: Path to AIR template files.
+        @type source: string
+        """
+        airdir = os.path.join(self.basedir, "air")
+        
+        if os.path.exists(airdir):
             if not self.quiet:
-                print "public_html/ already exists: not replacing"
+                print "air/ already exists: not replacing"
             return
         else:
-            os.mkdir(webdir)
-            os.mkdir(cssdir)
-            os.mkdir(imagesdir)
-        if not self.quiet:
-            print "Populating public_html/"
-            
-        target = os.path.join(webdir, "index.html")
-        f = open(target, "wt")
-        f.write(open(index_html, "rt").read())
-        f.close()
+            if not self.quiet:
+                print "Populating air/"
+            # copy source dir to new airdir
+            os.mkdir(airdir)
 
-        target = os.path.join(cssdir, "pair.css")
-        f = open(target, "wt")
-        f.write(open(pair_css, "rt").read())
-        f.close()
+    def sample_python(self, source):
+        """
+        Generate sample Python source files for the new project.
 
-        target = os.path.join(cssdir, "dependencies.css")
-        f = open(target, "wt")
-        f.write(open(dependencies_css, "rt").read())
-        f.close()
-
-        target = os.path.join(webdir, "robots.txt")
-        f = open(target, "wt")
-        f.write(open(robots_txt, "rt").read())
-        f.close()
+        @param source: Path to Python template files.
+        @type source: string
+        """
+        pydir = os.path.join(self.basedir, "python")
         
+        if os.path.exists(pydir):
+            if not self.quiet:
+                print "python/ already exists: not replacing"
+            return
+        else:
+            os.mkdir(pydir)
+        if not self.quiet:
+            print "Populating python/"
+
+    def sample_install(self, source):
+        """
+        Cross-platform installer files (nsis/appinstaller).
+
+        @param source: Path to installer template files.
+        @type source: string
+        """
+        installerdir = os.path.join(self.basedir, "installer")
+        
+        if os.path.exists(installerdir):
+            if not self.quiet:
+                print "installer/ already exists: not replacing"
+            return
+        else:
+            os.mkdir(installerdir)
+        if not self.quiet:
+            print "Populating installer/"
+            
     def mkinfo(self):
         path = os.path.join(self.basedir, "info")
         if not os.path.exists(path):
@@ -239,21 +274,14 @@ class Maker(object):
 def createEnvironment(config):
     """
     Create and populate a directory for a new project.
-    
+
     @param config:
     @type config:
     """
     m = Maker(config)
     m.mkdir()
-    m.chdir()
-       
-    m.sampleconfig(util.sibpath(__file__, "templates/sample.cfg"))
-    
-    m.public_html(util.sibpath(__file__, "web/index.html"),
-                  util.sibpath(__file__, "web/css/pair.css"),
-                  util.sibpath(__file__, "web/css/dependencies.css"),
-                  util.sibpath(__file__, "web/robots.txt"),
-                  )
+    m.chdir()    
+    m.init_env()
 
     if not m.quiet:
         print "Project configured in %s" % m.basedir
