@@ -64,10 +64,10 @@ class Maker(object):
         """
         Generate sample project configuration file.
 
-        @param source: Path to sample.cfg file.
+        @param source: Path to sample.conf file.
         @type source: string
         """
-        target = "project.cfg.sample"
+        target = "project.conf.sample"
         config_sample = open(source, "rt").read()
         
         if os.path.exists(target):
@@ -243,10 +243,10 @@ class Maker(object):
         from buildbot.master import BuildMaster
         from twisted.python import log, failure
 
-        master_cfg = os.path.join(self.basedir, "master.cfg")
+        master_cfg = os.path.join(self.basedir, "project.conf")
         if not os.path.exists(master_cfg):
             if not self.quiet:
-                print "No master.cfg found"
+                print "No project.conf found"
             return 1
 
         if sys.path[0] != self.basedir:
@@ -266,8 +266,8 @@ class Maker(object):
                     print "".join(m['message'])
                 print f
                 print
-                print "An error was detected in the master.cfg file."
-                print "Please correct the problem and run 'pair upgrade-master' again."
+                print "An error was detected in the project.conf file."
+                print "Please correct the problem and run 'pair upgrade' again."
                 print
             return 1
         return 0
@@ -282,7 +282,7 @@ def createEnvironment(config):
     m = Maker(config)
     m.mkdir()
     m.chdir()    
-    m.init_env(util.sibpath(__file__, 'templates/sample.cfg'),
+    m.init_env(util.sibpath(__file__, 'templates/sample.conf'),
                util.sibpath(__file__, 'templates/air'),
                util.sibpath(__file__, 'templates/python'),
                util.sibpath(__file__, 'templates/installer'))
@@ -306,10 +306,11 @@ def upgradeEnvironment(config):
                           util.sibpath(__file__, "../web/css/dependencies.css"),
                           util.sibpath(__file__, "../web/robots.txt"),
                           )
-    m.populate_if_missing(os.path.join(basedir, "master.cfg.sample"),
-                          util.sibpath(__file__, "sample.cfg"),
+    m.populate_if_missing(os.path.join(basedir, "project.conf.sample"),
+                          util.sibpath(__file__, "sample.conf"),
                           overwrite=True)
     rc = m.check_master_cfg()
+    
     if rc:
         return rc
     if not config['quiet']:
