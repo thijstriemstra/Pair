@@ -14,25 +14,109 @@ Pair: Python for the Adobe Integrated Runtime (AIR).
 @status: Pre-Alpha
 """
 
+import os
+
+from twisted.python import util
+
 __version__ = '1.0.0'
 
 class Maker(object):
     """
     """
+    
     def __init__(self, config):
         self.config = config
         self.basedir = config['basedir']
         self.force = config.get('force', False)
         self.quiet = config['quiet']
 
+    def chdir(self):
+        """
+        Change into base directory.
+        """
+        if not self.quiet:
+            print "Changing to", self.basedir
+        os.chdir(self.basedir)
+        
     def mkdir(self):
+        """
+        Create new base directory, skip if it exists.
+        """
         if os.path.exists(self.basedir):
             if not self.quiet:
-                print "updating existing installation"
+                print "Updating existing installation"
             return
-        if not self.quiet: print "mkdir", self.basedir
+        
+        if not self.quiet:
+            print "Creating", self.basedir
+            
         os.mkdir(self.basedir)
 
+    def sampleconfig(self, source):
+        """
+        Generate sample configuration file.
+
+        @param source: Path to sample.cfg file.
+        @type source: string
+        """
+        target = "project.cfg.sample"
+        config_sample = open(source, "rt").read()
+        
+        if os.path.exists(target):
+            oldcontents = open(target, "rt").read()
+            if oldcontents == config_sample:
+                if not self.quiet:
+                    print "%s already exists and is up-to-date" % target
+                return
+            if not self.quiet:
+                print "Replacing", target
+        else:
+            if not self.quiet:
+                print "Creating", target
+        
+        f = open(target, "wt")
+        f.write(config_sample)
+        f.close()
+        os.chmod(target, 0600)
+
+    def public_html(self, index_html, pair_css, dependencies_css, robots_txt):
+        """
+        """
+        webdir = os.path.join(self.basedir, "public_html")
+        cssdir = os.path.join(webdir, "css")
+        imagesdir = os.path.join(webdir, "images")
+        
+        if os.path.exists(webdir):
+            if not self.quiet:
+                print "public_html/ already exists: not replacing"
+            return
+        else:
+            os.mkdir(webdir)
+            os.mkdir(cssdir)
+            os.mkdir(imagesdir)
+        if not self.quiet:
+            print "Populating public_html/"
+            
+        target = os.path.join(webdir, "index.html")
+        f = open(target, "wt")
+        f.write(open(index_html, "rt").read())
+        f.close()
+
+        target = os.path.join(cssdir, "pair.css")
+        f = open(target, "wt")
+        f.write(open(pair_css, "rt").read())
+        f.close()
+
+        target = os.path.join(cssdir, "dependencies.css")
+        f = open(target, "wt")
+        f.write(open(dependencies_css, "rt").read())
+        f.close()
+
+        target = os.path.join(webdir, "robots.txt")
+        f = open(target, "wt")
+        f.write(open(robots_txt, "rt").read())
+        f.close()
+        
     def mkinfo(self):
         path = os.path.join(self.basedir, "info")
         if not os.path.exists(path):
@@ -57,31 +141,7 @@ class Maker(object):
             created = True
         if created and not self.quiet:
             print "Please edit the files in %s appropriately." % path
-
-    def chdir(self):
-        if not self.quiet: print "chdir", self.basedir
-        os.chdir(self.basedir)
         
-    def makeTAC(self, contents, secret=False):
-        tacfile = "pair.tac"
-        
-        if os.path.exists(tacfile):
-            oldcontents = open(tacfile, "rt").read()
-            if oldcontents == contents:
-                if not self.quiet:
-                    print tacfile, "already exists and is correct"
-                return
-            if not self.quiet:
-                print "not touching existing", tacfile
-                print "creating %s.new instead" % tacfile
-            tacfile = "%s.new" % tacfile
-            
-        f = open(tacfile, "wt")
-        f.write(contents)
-        f.close()
-        if secret:
-            os.chmod(tacfile, 0600)
-
     def makefile(self):
         target = "Makefile.sample"
         if os.path.exists(target):
@@ -97,63 +157,6 @@ class Maker(object):
                 print "creating Makefile.sample"
         f = open(target, "wt")
         f.write(makefile_sample)
-        f.close()
-
-    def sampleconfig(self, source):
-        target = "master.cfg.sample"
-        config_sample = open(source, "rt").read()
-        if os.path.exists(target):
-            oldcontents = open(target, "rt").read()
-            if oldcontents == config_sample:
-                if not self.quiet:
-                    print "master.cfg.sample already exists and is up-to-date"
-                return
-            if not self.quiet:
-                print "replacing master.cfg.sample"
-        else:
-            if not self.quiet:
-                print "creating master.cfg.sample"
-        f = open(target, "wt")
-        f.write(config_sample)
-        f.close()
-        os.chmod(target, 0600)
-        
-    def public_html(self, index_html, pair_css, dependencies_css, robots_txt):
-        """
-        """
-        webdir = os.path.join(self.basedir, "public_html")
-        cssdir = os.path.join(webdir, "css")
-        imagesdir = os.path.join(webdir, "images")
-        
-        if os.path.exists(webdir):
-            if not self.quiet:
-                print "public_html/ already exists: not replacing"
-            return
-        else:
-            os.mkdir(webdir)
-            os.mkdir(cssdir)
-            os.mkdir(imagesdir)
-        if not self.quiet:
-            print "populating public_html/"
-            
-        target = os.path.join(webdir, "index.html")
-        f = open(target, "wt")
-        f.write(open(index_html, "rt").read())
-        f.close()
-
-        target = os.path.join(cssdir, "pair.css")
-        f = open(target, "wt")
-        f.write(open(pair_css, "rt").read())
-        f.close()
-
-        target = os.path.join(cssdir, "dependencies.css")
-        f = open(target, "wt")
-        f.write(open(dependencies_css, "rt").read())
-        f.close()
-
-        target = os.path.join(webdir, "robots.txt")
-        f = open(target, "wt")
-        f.write(open(robots_txt, "rt").read())
         f.close()
 
     def populate_if_missing(self, target, source, overwrite=False):
@@ -233,8 +236,32 @@ class Maker(object):
             return 1
         return 0
 
+def createEnvironment(config):
+    """
+    Create and populate a directory for a new project.
+    
+    @param config:
+    @type config:
+    """
+    m = Maker(config)
+    m.mkdir()
+    m.chdir()
+       
+    m.sampleconfig(util.sibpath(__file__, "templates/sample.cfg"))
+    
+    m.public_html(util.sibpath(__file__, "web/index.html"),
+                  util.sibpath(__file__, "web/css/pair.css"),
+                  util.sibpath(__file__, "web/css/dependencies.css"),
+                  util.sibpath(__file__, "web/robots.txt"),
+                  )
+
+    if not m.quiet:
+        print "Project configured in %s" % m.basedir
+    
 def upgradeEnvironment(config):
     """
+    Upgrade an existing project directory for the current version.
+    
     @param config:
     @type config:
     """
@@ -255,9 +282,11 @@ def upgradeEnvironment(config):
         return rc
     if not config['quiet']:
         print "upgrade complete"
-        
-def buildProject(config):
+
+def cleanProject(config):
     """
+    Clean the project build files.
+    
     @param config:
     @type config:
     """
@@ -282,27 +311,38 @@ def buildProject(config):
 
     if not m.quiet: print "buildslave configured in %s" % m.basedir
     
-def createEnvironment(config):
+def buildProject(config):
     """
+    Start a project build.
+    
     @param config:
     @type config:
     """
     m = Maker(config)
     m.mkdir()
     m.chdir()
-    contents = masterTAC % config
-    m.makeTAC(contents)
-    m.sampleconfig(util.sibpath(__file__, "sample.cfg"))
-    m.public_html(util.sibpath(__file__, "../web/index.html"),
-                  util.sibpath(__file__, "../web/css/pair.css"),
-                  util.sibpath(__file__, "../web/css/dependencies.css"),
-                  util.sibpath(__file__, "../web/robots.txt"),
-                  )
+    try:
+        master = config['master']
+        host, port = re.search(r'(.+):(\d+)', master).groups()
+        config['host'] = host
+        config['port'] = int(port)
+    except:
+        print "unparseable master location '%s'" % master
+        print " expecting something more like localhost:8007"
+        raise
+    contents = slaveTAC % config
 
-    if not m.quiet: print "project configured in %s" % m.basedir
+    m.makeTAC(contents, secret=True)
 
-def dist(config):
+    m.makefile()
+    m.mkinfo()
+
+    if not m.quiet: print "buildslave configured in %s" % m.basedir
+    
+def createDistribution(config):
     """
+    Create application installer.
+    
     @param config:
     @type config:
     """
@@ -313,8 +353,10 @@ def dist(config):
         print "now restarting Pair process.."
     start(config)
 
-def report(config):
+def createReport(config):
     """
+    Generate project report.
+    
     @param config:
     @type config:
     """
@@ -343,8 +385,10 @@ def report(config):
     time.sleep(0.2)
     launch(config)
 
-def docs(config):
+def createDocs(config):
     """
+    Create project documentation.
+    
     @param config:
     @type config:
     """

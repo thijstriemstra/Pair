@@ -3,6 +3,8 @@
 
 import os, sys, stat, re, time
 
+import pair
+
 from twisted.python import usage, util, runtime
 
 class MakerBase(usage.Options):
@@ -15,6 +17,12 @@ class MakerBase(usage.Options):
 
     opt_h = usage.Options.opt_help
 
+    def opt_version(self):
+        print "Pair version:", Options.pair_version
+        print "PyAMF version:", Options.pyamf_version
+        
+        usage.Options.opt_version(self)
+        
     def parseArgs(self, *args):
         if len(args) > 0:
             self['basedir'] = args[0]
@@ -28,6 +36,30 @@ class MakerBase(usage.Options):
             raise usage.UsageError("<basedir> parameter is required")
         self['basedir'] = os.path.abspath(self['basedir'])
 
+class EnvironmentOptions(MakerBase):
+    """
+    Create a new project environment.
+    """
+    optFlags = [
+        ["force", "f",
+         "Re-use an existing directory (will not overwrite project.cfg file)"],
+    ]
+    
+    optParameters = [
+        ["config", "c", "project.cfg", "Name of the project config file"],
+    ]
+    
+    def getSynopsis(self):
+        return "Usage:    pair initenv [options] <basedir>"
+
+    longdesc = """
+    This command creates a project development environment. The project will
+    live in <basedir> and create various files there.
+
+    At runtime, the project will read a configuration file (named
+    'project.cfg' by default) in its basedir.
+    """
+    
 class UpgradeOptions(MakerBase):
     """
     """
@@ -50,29 +82,6 @@ class UpgradeOptions(MakerBase):
     .new file (for example, if index.html has been modified, this command
     will create index.html.new). You can then look at the new version and
     decide how to merge its contents into your modified file.
-    """
-
-class EnvironmentOptions(MakerBase):
-    """
-    """
-    optFlags = [
-        ["force", "f",
-         "Re-use an existing directory (will not overwrite project.cfg file)"],
-    ]
-    
-    optParameters = [
-        ["config", "c", "project.cfg", "name of the project config file"],
-    ]
-    
-    def getSynopsis(self):
-        return "Usage:    pair initenv [options] <basedir>"
-
-    longdesc = """
-    This command creates a project development environment. The project will
-    live in <basedir> and create various files there.
-
-    At runtime, the project will read a configuration file (named
-    'project.cfg' by default) in its basedir.
     """
 
 class SlaveOptions(MakerBase):
@@ -218,18 +227,8 @@ class Options(usage.Options):
         ['docs', None, ReportOptions,
          "Create project documentation"],
     ]
-
-    def opt_help(self):
-        """
-        Display this help and exit
-        """
-        print self.__str__()
-        sys.exit(0)
-        
+       
     def opt_version(self):
-        """
-        Print application and dependency version numbers
-        """
         print "Pair version:", Options.pair_version
         print "PyAMF version:", Options.pyamf_version
         
@@ -271,16 +270,16 @@ def run():
     so = config.subOptions
     
     if command == "initenv":
-        createEnvironment(so)
+        pair.createEnvironment(so)
     elif command == "upgrade":
-        upgradeEnvironment(so)
+        pair.upgradeEnvironment(so)
     elif command == "build":
-        buildProject(so)
+        pair.buildProject(so)
     elif command == "clean":
-        print command
+        pair.cleanProject(so)
     elif command == "dist":
-        print command
+        pair.createDistribution(so)
     elif command == "report":
-        print command
+        pair.createReport(so)
     elif command == "docs":
-        print command
+        pair.createDocs(so)
