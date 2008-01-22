@@ -6,10 +6,12 @@ import os, sys, stat, re, time
 from twisted.python import usage, util, runtime
 
 class MakerBase(usage.Options):
+    """
+    """
     optFlags = [
         ['help', 'h', "Display this message"],
         ["quiet", "q", "Do not emit the commands being run"],
-        ]
+    ]
 
     opt_h = usage.Options.opt_help
 
@@ -27,9 +29,11 @@ class MakerBase(usage.Options):
         self['basedir'] = os.path.abspath(self['basedir'])
 
 class UpgradeOptions(MakerBase):
+    """
+    """
     optFlags = [
         ["replace", "r", "Replace any modified files without confirmation."],
-        ]
+    ]
 
     def getSynopsis(self):
         return "Usage:    pair upgrade [options] <basedir>"
@@ -49,13 +53,17 @@ class UpgradeOptions(MakerBase):
     """
 
 class EnvironmentOptions(MakerBase):
+    """
+    """
     optFlags = [
         ["force", "f",
          "Re-use an existing directory (will not overwrite project.cfg file)"],
-        ]
+    ]
+    
     optParameters = [
         ["config", "c", "project.cfg", "name of the project config file"],
-        ]
+    ]
+    
     def getSynopsis(self):
         return "Usage:    pair initenv [options] <basedir>"
 
@@ -68,9 +76,12 @@ class EnvironmentOptions(MakerBase):
     """
 
 class SlaveOptions(MakerBase):
+    """
+    """
     optFlags = [
         ["force", "f", "Re-use an existing directory"],
-        ]
+    ]
+    
     optParameters = [
 #        ["name", "n", None, "Name for this build slave"],
 #        ["passwd", "p", None, "Password for this build slave"],
@@ -136,77 +147,115 @@ s.setServiceParent(application)
 
 """
 
-class BuildOptions(MakerBase):
+class CleanOptions(MakerBase):
+    """
+    """
     optFlags = [
         ['quiet', 'q', "Don't display startup log messages"],
-        ]
+    ]
+    
+    def getSynopsis(self):
+        return "Usage:    pair clean <basedir>"
+
+class BuildOptions(MakerBase):
+    """
+    """
+    optFlags = [
+        ['quiet', 'q', "Don't display startup log messages"],
+    ]
+
     def getSynopsis(self):
         return "Usage:    pair build <basedir>"
 
 class DistOptions(MakerBase):
+    """
+    """
     def getSynopsis(self):
         return "Usage:    pair dist <basedir>"
 
 class ReportOptions(MakerBase):
+    """
+    """
     optFlags = [
         ['quiet', 'q', "Don't display log messages about reconfiguration"],
-        ]
+    ]
+
     def getSynopsis(self):
         return "Usage:    pair report <basedir>"
-
-class CleanOptions(MakerBase):
-    optFlags = [
-        ['quiet', 'q', "Don't display startup log messages"],
-        ]
-    def getSynopsis(self):
-        return "Usage:    pair clean <basedir>"
-   
+  
 class Options(usage.Options):
     """
+    Option list parser class.
     """
     import pair
-    import buildbot
     import pyamf
-    
-    buildbot_version = buildbot.version
+
     pair_version = pair.__version__
     pyamf_version = pyamf.__version__[:3]
         
     synopsis = "Usage:    pair <command> [command options]"
 
+    #: Main options
     subCommands = [
         ['initenv', None, EnvironmentOptions,
          "Create and populate a directory for a new project"],
+        
         ['upgrade', None, UpgradeOptions,
          "Upgrade an existing project directory for the current version"],
+        
         ['build', None, BuildOptions,
          "Start a project build"],
-        ['clean', None, CleanOptions, "Clean the project build files"],
-        ['dist', None, DistOptions, "Create a distribution"],
+        
+        ['clean', None, CleanOptions,
+         "Clean the project build files"],
+        
+        ['dist', None, DistOptions,
+         "Create application installer"],
+        
         ['report', None, ReportOptions,
-         "Create project report"],
+         "Generate project report"],
+        
         ['docs', None, ReportOptions,
          "Create project documentation"],
     ]
 
+    def opt_help(self):
+        """
+        Display this help and exit
+        """
+        print self.__str__()
+        sys.exit(0)
+        
     def opt_version(self):
+        """
+        Print application and dependency version numbers
+        """
         print "Pair version:", Options.pair_version
         print "PyAMF version:", Options.pyamf_version
-        print "Buildbot version:", Options.buildbot_version
+        
         usage.Options.opt_version(self)
 
     def opt_verbose(self):
+        """
+        Use verbose logging that adds a timestamp for every line
+        """
         from twisted.python import log
         log.startLogging(sys.stderr)
 
     def postOptions(self):
+        """
+        Called after the options are parsed, used to validate that
+        all options are sane.
+        """
         if not hasattr(self, 'subOptions'):
             raise usage.UsageError("must specify a command")
 
 def run():
     """
+    Start the Pair commandline tool.
     """
     config = Options()
+    
     try:
         config.parseOptions()
     except usage.error, e:
