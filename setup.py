@@ -14,7 +14,7 @@ setup(
     url = "http://pair.collab.eu",
     packages = find_packages(),
     include_package_data = True,
-    install_requires = ["Twisted>=2.5.0", "PyAMF>=0.1,==dev"],
+    install_requires = ["SQLAlchemy>=0.4.2", "Twisted>=2.5.0", "PyAMF>=0.1,==dev"],
     license = "GNU General Public License (GPL)",
     classifiers = [
         "Development Status :: 2 - Pre-Alpha",
