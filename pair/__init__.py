@@ -16,7 +16,7 @@ Pair: Python for the Adobe Integrated Runtime (AIR).
 
 import os
 
-from twisted.python import util
+from twisted.python import util, runtime
 
 __version__ = '1.0.0'
 
@@ -67,7 +67,7 @@ class Maker(object):
         @param source: Path to sample.conf file.
         @type source: string
         """
-        target = "project.conf.sample"
+        target = "project.cfg.sample"
         config_sample = open(source, "rt").read()
         
         if os.path.exists(target):
@@ -243,8 +243,8 @@ class Maker(object):
         from buildbot.master import BuildMaster
         from twisted.python import log, failure
 
-        master_cfg = os.path.join(self.basedir, "project.conf")
-        if not os.path.exists(master_cfg):
+        proj_cfg = os.path.join(self.basedir, "project.cfg")
+        if not os.path.exists(proj_cfg):
             if not self.quiet:
                 print "No project.conf found"
             return 1
@@ -257,7 +257,7 @@ class Maker(object):
         messages = []
         log.addObserver(messages.append)
         try:
-            m.loadConfig(open(master_cfg, "r"))
+            m.loadConfig(open(proj_cfg, "r"))
         except:
             f = failure.Failure()
             if not self.quiet:
@@ -266,7 +266,7 @@ class Maker(object):
                     print "".join(m['message'])
                 print f
                 print
-                print "An error was detected in the project.conf file."
+                print "An error was detected in the project.cfg file."
                 print "Please correct the problem and run 'pair upgrade' again."
                 print
             return 1
@@ -282,7 +282,7 @@ def createEnvironment(config):
     m = Maker(config)
     m.mkdir()
     m.chdir()    
-    m.init_env(util.sibpath(__file__, 'templates/sample.conf'),
+    m.init_env(util.sibpath(__file__, 'templates/sample.cfg'),
                util.sibpath(__file__, 'templates/air'),
                util.sibpath(__file__, 'templates/python'),
                util.sibpath(__file__, 'templates/installer'))
@@ -306,15 +306,15 @@ def upgradeEnvironment(config):
                           util.sibpath(__file__, "../web/css/dependencies.css"),
                           util.sibpath(__file__, "../web/robots.txt"),
                           )
-    m.populate_if_missing(os.path.join(basedir, "project.conf.sample"),
-                          util.sibpath(__file__, "sample.conf"),
+    m.populate_if_missing(os.path.join(basedir, "project.cfg.sample"),
+                          util.sibpath(__file__, "sample.cfg"),
                           overwrite=True)
     rc = m.check_master_cfg()
     
     if rc:
         return rc
     if not config['quiet']:
-        print "upgrade complete"
+        print "Upgrade complete"
 
 def cleanProject(config):
     """
@@ -326,6 +326,7 @@ def cleanProject(config):
     m = Maker(config)
     m.mkdir()
     m.chdir()
+    
     try:
         master = config['master']
         host, port = re.search(r'(.+):(\d+)', master).groups()
@@ -335,6 +336,7 @@ def cleanProject(config):
         print "unparseable master location '%s'" % master
         print " expecting something more like localhost:8007"
         raise
+    
     contents = slaveTAC % config
 
     m.makeTAC(contents, secret=True)
@@ -454,62 +456,27 @@ def createDocs(config):
         run = twistd.run
     run()
 
-def loadOptions(filename="options", here=None, home=None):
+def loadOptions(filename='project.cfg', folder=None):
     """
-    Find the .pair/FILENAME file. Crawl from the current directory up
-    towards the root, and also look in ~/.buildbot . The first directory
-    that's owned by the user and has the file we're looking for wins. Windows
-    skips the owned-by-user test.
-    
     @rtype:  dict
     @return: a dictionary of names defined in the options file. If no options
              file was found, return an empty dict.
     """
-
-    if here is None:
-        here = os.getcwd()
-    here = os.path.abspath(here)
-
-    if home is None:
-        if runtime.platformType == 'win32':
-            home = os.path.join(os.environ['APPDATA'], "pair")
-        else:
-            home = os.path.expanduser("~/.pair")
-
-    searchpath = []
-    toomany = 20
-    while True:
-        searchpath.append(os.path.join(here, ".pair"))
-        next = os.path.dirname(here)
-        if next == here:
-            break # we've hit the root
-        here = next
-        toomany -= 1 # just in case
-        if toomany == 0:
-            raise ValueError("Hey, I seem to have wandered up into the "
-                             "infinite glories of the heavens. Oops.")
-    searchpath.append(home)
-
     localDict = {}
 
-    for d in searchpath:
-        if os.path.isdir(d):
-            if runtime.platformType != 'win32':
-                if os.stat(d)[stat.ST_UID] != os.getuid():
-                    print "skipping %s because you don't own it" % d
-                    continue # security, skip other people's directories
-            optfile = os.path.join(d, filename)
-            if os.path.exists(optfile):
-                try:
-                    f = open(optfile, "r")
-                    options = f.read()
-                    exec options in localDict
-                except:
-                    print "error while reading %s" % optfile
-                    raise
-                break
-
+    optfile = os.path.join(folder, filename)
+    
+    if os.path.exists(optfile):
+        try:
+            f = open(optfile, "r")
+            options = f.read()
+            exec options in localDict
+        except:
+            print "Error while reading %s" % optfile
+            raise
+    
     for k in localDict.keys():
         if k.startswith("__"):
             del localDict[k]
+            
     return localDict

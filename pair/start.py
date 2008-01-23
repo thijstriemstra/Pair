@@ -5,7 +5,7 @@ import os, sys, stat, re, time
 
 import pair
 
-from twisted.python import usage, util, runtime
+from twisted.python import usage, util
 
 class MakerBase(usage.Options):
     """
@@ -196,11 +196,9 @@ class Options(usage.Options):
     """
     Option list parser class.
     """
-    import pair
-    import pyamf
-
-    pair_version = pair.__version__
-    pyamf_version = pyamf.__version__[:3]
+    from pair import __version__ as pair_version
+    from pyamf import __version__
+    pyamf_version = '%s.%s' % (__version__[0], __version__[1])
         
     synopsis = "Usage:    pair <command> [command options]"
 
