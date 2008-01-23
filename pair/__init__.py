@@ -14,22 +14,55 @@ Pair: Python for the Adobe Integrated Runtime (AIR).
 @status: Pre-Alpha
 """
 
-import os
-
-from twisted.python import util, runtime
-
 __version__ = '1.0.0'
 
-class Maker(object):
+import os, sys
+
+from pair import options
+
+from twisted.python import usage, util
+
+class BaseEnvironment(object):
     """
+    Base class for an environment.
     """
-    
     def __init__(self, config):
+        """
+        @param config: Commandline options.
+        @type config: L{Options<pair.options.Options>}
+        """
         self.config = config
         self.basedir = config['basedir']
         self.force = config.get('force', False)
         self.quiet = config['quiet']
+        self.components = []
 
+    def __repr__(self):
+        r = "<BaseEnvironment name=%s/>" % (self.name)
+
+    def init(self):
+        """
+        Create a new L{environment<pair.BaseEnvironment>}.
+        """
+
+    def build(self):
+        """
+        Build project.
+        """
+
+    def dist(self):
+        """
+        Create distribution.
+        """
+
+    def sample_config(self, source):
+        """
+        Generate sample configuration file.
+
+        @param source: Path to sample.conf file.
+        @type source: string
+        """
+        
     def chdir(self):
         """
         Change into base directory.
@@ -38,6 +71,37 @@ class Maker(object):
             print "Changing to", self.basedir
         os.chdir(self.basedir)
         
+    
+class ProjectEnvironment(BaseEnvironment):
+    """
+    Base class for a project environment.
+    """
+
+    def __init__(self):
+        """
+        @param config: Commandline options.
+        @type config: L{Options<pair.options.Options>}
+        """
+        self.config = config
+        self.basedir = config['basedir']
+        self.force = config.get('force', False)
+        self.quiet = config['quiet']
+        self.components = []
+        
+    def init(self, config):
+        """
+        Create a new project L{environment<pair.Environment>}.
+        """
+        self.mkdir()
+        self.chdir()
+
+        self.sample_config(util.sibpath(__file__, 'templates/sample.cfg'))
+        self.sample_air(util.sibpath(__file__, 'templates/air'))
+        self.sample_python(util.sibpath(__file__, 'templates/python'))
+        
+        if not self.quiet:
+            print "Project configured in %s" % self.basedir
+
     def mkdir(self):
         """
         Create new base directory, skip if it exists.
@@ -51,14 +115,6 @@ class Maker(object):
             print "Creating", self.basedir
             
         os.mkdir(self.basedir)
-
-    def init_env(self, cfg, air, python, install):
-        """
-        Create and populate a directory for a new project.
-        """
-        self.sample_config(cfg)
-        self.sample_air(air)
-        self.sample_python(python)
 
     def sample_config(self, source):
         """
@@ -272,23 +328,13 @@ class Maker(object):
             return 1
         return 0
 
-def createEnvironment(config):
+class AIRBuilder(BaseEnvironment):
     """
-    Create and populate a directory for a new project.
-
-    @param config:
-    @type config:
     """
-    m = Maker(config)
-    m.mkdir()
-    m.chdir()    
-    m.init_env(util.sibpath(__file__, 'templates/sample.cfg'),
-               util.sibpath(__file__, 'templates/air'),
-               util.sibpath(__file__, 'templates/python'),
-               util.sibpath(__file__, 'templates/installer'))
-
-    if not m.quiet:
-        print "Project configured in %s" % m.basedir
+    def clean(self):
+        """
+        Clean build files.
+        """  
     
 def upgradeEnvironment(config):
     """
@@ -395,30 +441,6 @@ def createReport(config):
     @param config:
     @type config:
     """
-    os.chdir(config['basedir'])
-    if not os.path.exists("pair.tac"):
-        print "This doesn't look like a Pair base directory:"
-        print "No pair.tac file."
-        print "Giving up!"
-        sys.exit(1)
-    if config['quiet']:
-        return launch(config)
-
-    # we probably can't do this os.fork under windows
-    from twisted.python.runtime import platformType
-    if platformType == "win32":
-        return launch(config)
-
-    # fork a child to launch the daemon, while the parent process tails the
-    # logfile
-    if os.fork():
-        # this is the parent
-        rc = Follower().follow()
-        sys.exit(rc)
-    # this is the child: give the logfile-watching parent a chance to start
-    # watching it before we start the daemon
-    time.sleep(0.2)
-    launch(config)
 
 def createDocs(config):
     """
@@ -427,34 +449,6 @@ def createDocs(config):
     @param config:
     @type config:
     """
-    sys.path.insert(0, os.path.abspath(os.getcwd()))
-    
-    # see if we can launch the application without actually having to
-    # spawn twistd, since spawning processes correctly is a real hassle
-    # on windows.
-    from twisted.python.runtime import platformType
-    argv = ["twistd",
-            "--no_save",
-            "--logfile=twistd.log", # windows doesn't use the same default
-            "--python=pair.tac"]
-    if platformType == "win32":
-        argv.append("--reactor=win32")
-    sys.argv = argv
-
-    # this is copied from bin/twistd. twisted-2.0.0 through 2.4.0 use
-    # _twistw.run . Twisted-2.5.0 and later use twistd.run, even for
-    # windows.
-    from twisted import __version__
-    major, minor, ignored = __version__.split(".", 2)
-    major = int(major)
-    minor = int(minor)
-    if (platformType == "win32" and (major == 2 and minor < 5)):
-        from twisted.scripts import _twistw
-        run = _twistw.run
-    else:
-        from twisted.scripts import twistd
-        run = twistd.run
-    run()
 
 def loadOptions(filename='project.cfg', folder=None):
     """
@@ -470,13 +464,47 @@ def loadOptions(filename='project.cfg', folder=None):
         try:
             f = open(optfile, "r")
             options = f.read()
-            exec options in localDict
+            print exec(options)
         except:
             print "Error while reading %s" % optfile
             raise
-    
-    for k in localDict.keys():
-        if k.startswith("__"):
-            del localDict[k]
             
     return localDict
+
+def run():
+    """
+    Start the Pair commandline tool.
+    """
+    config = options.Options()
+    
+    try:
+        config.parseOptions()
+    except usage.error, e:
+        print "%s:  %s" % (sys.argv[0], e)
+        print
+        print "Pair %s" % Options.pair_version
+        print
+        c = getattr(config, 'subOptions', config)
+        print str(c)
+        sys.exit(1)
+
+    command = config.subCommand
+    so = config.subOptions
+
+    if command == "initenv":
+        project = ProjectEnvironment()
+        project.init(so)
+        return
+    
+    if command == "upgrade":
+        project.upgrade(so)
+    elif command == "build":
+        project.build(so)
+    elif command == "clean":
+        project.clean(so)
+    elif command == "dist":
+        project.dist(so)
+    elif command == "report":
+        project.report(so)
+    elif command == "docs":
+        project.docs(so)

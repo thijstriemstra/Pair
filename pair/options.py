@@ -174,38 +174,3 @@ class Options(usage.Options):
         """
         if not hasattr(self, 'subOptions'):
             raise usage.UsageError("must specify a command")
-
-def run():
-    """
-    Start the Pair commandline tool.
-    """
-    config = Options()
-    
-    try:
-        config.parseOptions()
-    except usage.error, e:
-        print "%s:  %s" % (sys.argv[0], e)
-        print
-        print "Pair %s" % Options.pair_version
-        print
-        c = getattr(config, 'subOptions', config)
-        print str(c)
-        sys.exit(1)
-
-    command = config.subCommand
-    so = config.subOptions
-    
-    if command == "initenv":
-        pair.createEnvironment(so)
-    elif command == "upgrade":
-        pair.upgradeEnvironment(so)
-    elif command == "build":
-        pair.buildProject(so)
-    elif command == "clean":
-        pair.cleanProject(so)
-    elif command == "dist":
-        pair.createDistribution(so)
-    elif command == "report":
-        pair.createReport(so)
-    elif command == "docs":
-        pair.createDocs(so)
