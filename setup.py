@@ -13,14 +13,9 @@ setup(
     description = "AIR for Python",
     url = "http://pair.collab.eu",
     packages = find_packages(),
-    include_package_data = True,    # include everything in source control
-    install_requires = ["buildbot>=0.7.6", "Twisted>=2.5.0", "PyAMF>=0.1.0a,==dev", "wsgiref"],
+    include_package_data = True,
+    install_requires = ["Twisted>=2.5.0", "PyAMF>=0.1,==dev"],
     license = "GNU General Public License (GPL)",
-    entry_points={
-        'console_scripts': [
-            'pair = pair.scripts.start:run',
-        ],
-    },
     classifiers = [
         "Development Status :: 2 - Pre-Alpha",
         "Natural Language :: English",
