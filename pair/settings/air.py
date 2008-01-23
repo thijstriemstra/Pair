@@ -103,3 +103,34 @@ class AIRIcons(object):
             self.folder)
         
         return r
+
+class AIRRuntime(object):
+    """
+    """
+    def __init__(self, version=None):
+        self.version = '1.0.M6'
+        self.packager = None
+        self.debugger = None
+        self.windows = None
+        self.macosx = None
+                
+    def __repr__(self):
+        r = "<AIRRuntime version=%s/>" % (
+            self.version)
+        
+        return r
+
+class AIRCertificate(object):
+    """
+    """
+    def __init__(self, name=None, type=None):
+        self.name = name
+        self.type = type
+        self.file = None
+        self.password = None
+                
+    def __repr__(self):
+        r = "<AIRCertificate name=%s type=%s/>" % (
+            self.name, self.type)
+        
+        return r
