@@ -26,15 +26,15 @@ class BaseEnvironment(object):
     """
     Base class for an environment.
     """
-    def __init__(self, config):
+    def __init__(self, cmd_options):
         """
-        @param config: Commandline options.
-        @type config: L{Options<pair.options.Options>}
+        @param cmd_options: Commandline options.
+        @type cmd_options: L{Options<pair.options.Options>}
         """
-        self.config = config
-        self.basedir = config['basedir']
-        self.force = config.get('force', False)
-        self.quiet = config['quiet']
+        self.config = cmd_options
+        self.basedir = cmd_options['basedir']
+        self.force = cmd_options.get('force', False)
+        self.quiet = cmd_options['quiet']
         self.components = []
 
     def __repr__(self):
@@ -77,21 +77,21 @@ class ProjectEnvironment(BaseEnvironment):
     Base class for a project environment.
     """
 
-    def __init__(self):
-        """
-        @param config: Commandline options.
-        @type config: L{Options<pair.options.Options>}
-        """
-        self.config = config
-        self.basedir = config['basedir']
-        self.force = config.get('force', False)
-        self.quiet = config['quiet']
-        self.components = []
-        
-    def init(self, config):
+    def init(self):
         """
         Create a new project L{environment<pair.Environment>}.
+         
+         - create tables
+         - map classes
+         - create session
+         - create folder structure and files
         """
+        from pair import db
+
+        # create database
+        db_cfg = util.sibpath(__file__, 'templates/settings.cfg')
+        env_engine = db.connect(db_cfg)
+
         self.mkdir()
         self.chdir()
 
@@ -464,7 +464,7 @@ def loadOptions(filename='project.cfg', folder=None):
         try:
             f = open(optfile, "r")
             options = f.read()
-            print exec(options)
+            #print exec(options)
         except:
             print "Error while reading %s" % optfile
             raise
@@ -491,12 +491,14 @@ def run():
     command = config.subCommand
     so = config.subOptions
 
-    if command == "initenv":
-        project = ProjectEnvironment()
-        project.init(so)
-        return
+    project = ProjectEnvironment(so)
     
-    if command == "upgrade":
+    if command == "initenv":
+        # create inital environment
+        # - database
+        # - folders
+        project.init()
+    elif command == "upgrade":
         project.upgrade(so)
     elif command == "build":
         project.build(so)
