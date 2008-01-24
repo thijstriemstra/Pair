@@ -30,7 +30,8 @@ core.organizations = Table('organizations', env_md,
     Column('name', String(255), default=None, nullable=True),
     Column('unit', String(255), default=None, nullable=True),
     Column('country', String(100), default=None, nullable=True),
-    Column('email', String(100), default=None, nullable=True)
+    Column('email', String(100), default=None, nullable=True),
+    Column('project_id', Integer, ForeignKey('projects.id'))
 )
 
 core.build_folders = Table('build_folders', env_md,
@@ -183,16 +184,19 @@ def connect(cfg_file):
 def mappings():
     """
     """
-    from sqlalchemy.orm import mapper
+    from sqlalchemy.orm import relation, mapper
 
-    return mapper(Project, core.projects)
+    mapper(Project, core.projects, properties={
+        'organizations':relation(Organization, backref='project')
+    })
+    
+    mapper(Organization, core.organizations)
 
 def session(env_engine):
     """
     """
-    # Session
     from sqlalchemy.orm import sessionmaker
-    Session = sessionmaker(bind=env_engine, autoflush=True, transactional=True)
-    session = Session()
     
-    return session
+    Session = sessionmaker(bind=env_engine, autoflush=True, transactional=True)
+    
+    return Session()

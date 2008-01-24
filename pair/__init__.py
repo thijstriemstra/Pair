@@ -19,6 +19,7 @@ __version__ = '1.0.0'
 import os, sys
 
 from pair import options
+from pair.tasks import *
 
 from twisted.python import usage, util
 
@@ -87,24 +88,27 @@ class ProjectEnvironment(BaseEnvironment):
          - create folder structure and files
         """
         from pair import db
-        from pair.tasks import Project
-        
+                
         # create database
         db_cfg = util.sibpath(__file__, 'templates/settings.cfg')
         env_engine = db.connect(db_cfg)
 
         # setup mappings        
         db.mappings()
-        new_project = Project('Hello World', 'Test Project')
-
-        # create project
         ses = db.session(env_engine)
-        ses.save(new_project)
+        
+        # create project
+        proj = Project('Hello World', 'Test Project')
+        org = Organization('Collab')
+        proj.organizations.append(org)
+
+        # save project
+        ses.save(proj)
         ses.commit()
 
         # query projects
         for project in ses.query(Project):
-            print project.name
+            print project.organizations
         
         self.mkdir()
         self.chdir()
