@@ -183,7 +183,6 @@ def connect(cfg_file):
 def mappings():
     """
     """
-    
     from sqlalchemy.orm import mapper
 
     return mapper(Project, core.projects)

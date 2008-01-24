@@ -9,6 +9,7 @@
 
 class Project(object):
     """
+    Project description.
     """
     def __init__(self, name=None, description=None, language='en'):
         self.name = name
@@ -26,6 +27,7 @@ class Project(object):
 
 class Organization(object):
     """
+    Organization behind the project.
     """
     def __init__(self, name=None, unit=None, country=None):
         self.name = name
@@ -41,6 +43,7 @@ class Organization(object):
 
 class BuildFolders(object):
     """
+    Build folders for project.
     """
     def __init__(self, base=None, build=None, image=None):
         self.base = base

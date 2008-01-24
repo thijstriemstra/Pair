@@ -116,6 +116,79 @@ class ProjectEnvironment(BaseEnvironment):
         if not self.quiet:
             print "Project configured in %s" % self.basedir
 
+    def upgrade(self):
+        """
+        Upgrade an existing project directory for the current version.
+        
+        @param config:
+        @type config:
+        """
+        basedir = config['basedir']
+        m = Maker(config)
+        # check web files
+        webdir = os.path.join(basedir, "public_html")
+        m.upgrade_public_html(util.sibpath(__file__, "../web/index.html"),
+                              util.sibpath(__file__, "../web/css/pair.css"),
+                              util.sibpath(__file__, "../web/css/dependencies.css"),
+                              util.sibpath(__file__, "../web/robots.txt"),
+                              )
+        m.populate_if_missing(os.path.join(basedir, "project.cfg.sample"),
+                              util.sibpath(__file__, "sample.cfg"),
+                              overwrite=True)
+        rc = m.check_master_cfg()
+        
+        if rc:
+            return rc
+        if not config['quiet']:
+            print "Upgrade complete"
+
+    def clean(self):
+        """
+        Clean the project build files.
+        
+        @param config:
+        @type config:
+        """
+        m = Maker(config)
+        m.mkdir()
+        m.chdir()
+        
+        try:
+            master = config['master']
+            host, port = re.search(r'(.+):(\d+)', master).groups()
+            config['host'] = host
+            config['port'] = int(port)
+        except:
+            print "unparseable master location '%s'" % master
+            print " expecting something more like localhost:8007"
+            raise
+        
+        contents = slaveTAC % config
+
+        m.makeTAC(contents, secret=True)
+
+        m.makefile()
+        m.mkinfo()
+
+        if not m.quiet:
+            print "project configured in %s" % m.basedir
+
+    def report(self):
+        """
+        Generate project report.
+        
+        @param config:
+        @type config:
+        """
+
+    def docs(self):
+        """
+        Create project documentation.
+        
+        @param config:
+        @type config:
+        """
+        
     def mkdir(self):
         """
         Create new base directory, skip if it exists.
@@ -342,6 +415,7 @@ class ProjectEnvironment(BaseEnvironment):
             return 1
         return 0
 
+
 class AIRBuilder(BaseEnvironment):
     """
     """
@@ -349,120 +423,7 @@ class AIRBuilder(BaseEnvironment):
         """
         Clean build files.
         """  
-    
-def upgradeEnvironment(config):
-    """
-    Upgrade an existing project directory for the current version.
-    
-    @param config:
-    @type config:
-    """
-    basedir = config['basedir']
-    m = Maker(config)
-    # check web files
-    webdir = os.path.join(basedir, "public_html")
-    m.upgrade_public_html(util.sibpath(__file__, "../web/index.html"),
-                          util.sibpath(__file__, "../web/css/pair.css"),
-                          util.sibpath(__file__, "../web/css/dependencies.css"),
-                          util.sibpath(__file__, "../web/robots.txt"),
-                          )
-    m.populate_if_missing(os.path.join(basedir, "project.cfg.sample"),
-                          util.sibpath(__file__, "sample.cfg"),
-                          overwrite=True)
-    rc = m.check_master_cfg()
-    
-    if rc:
-        return rc
-    if not config['quiet']:
-        print "Upgrade complete"
 
-def cleanProject(config):
-    """
-    Clean the project build files.
-    
-    @param config:
-    @type config:
-    """
-    m = Maker(config)
-    m.mkdir()
-    m.chdir()
-    
-    try:
-        master = config['master']
-        host, port = re.search(r'(.+):(\d+)', master).groups()
-        config['host'] = host
-        config['port'] = int(port)
-    except:
-        print "unparseable master location '%s'" % master
-        print " expecting something more like localhost:8007"
-        raise
-    
-    contents = slaveTAC % config
-
-    m.makeTAC(contents, secret=True)
-
-    m.makefile()
-    m.mkinfo()
-
-    if not m.quiet: print "buildslave configured in %s" % m.basedir
-    
-def buildProject(config):
-    """
-    Start a project build.
-    
-    @param config:
-    @type config:
-    """
-    m = Maker(config)
-    m.mkdir()
-    m.chdir()
-    try:
-        master = config['master']
-        host, port = re.search(r'(.+):(\d+)', master).groups()
-        config['host'] = host
-        config['port'] = int(port)
-    except:
-        print "unparseable master location '%s'" % master
-        print " expecting something more like localhost:8007"
-        raise
-    contents = slaveTAC % config
-
-    m.makeTAC(contents, secret=True)
-
-    m.makefile()
-    m.mkinfo()
-
-    if not m.quiet: print "buildslave configured in %s" % m.basedir
-    
-def createDistribution(config):
-    """
-    Create application installer.
-    
-    @param config:
-    @type config:
-    """
-    quiet = config['quiet']
-    from buildbot.scripts.startup import start
-    stop(config, wait=True)
-    if not quiet:
-        print "now restarting Pair process.."
-    start(config)
-
-def createReport(config):
-    """
-    Generate project report.
-    
-    @param config:
-    @type config:
-    """
-
-def createDocs(config):
-    """
-    Create project documentation.
-    
-    @param config:
-    @type config:
-    """
 
 def loadOptions(filename='project.cfg', folder=None):
     """
@@ -508,9 +469,6 @@ def run():
     project = ProjectEnvironment(so)
     
     if command == "initenv":
-        # create inital environment
-        # - database
-        # - folders
         project.init()
     elif command == "upgrade":
         project.upgrade(so)
