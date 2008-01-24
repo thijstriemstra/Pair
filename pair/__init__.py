@@ -21,7 +21,7 @@ import sys
 from pair import options
 from pair.services.core import ProjectService
 
-from twisted.python import usage
+from twisted.python import util
 
 def loadOptions(filename='project.cfg', folder=None):
     """
@@ -48,6 +48,8 @@ def run():
     """
     Start the Pair commandline tool.
     """
+    from twisted.python import usage
+    
     config = options.Options()
     
     try:
@@ -67,9 +69,11 @@ def run():
     project = ProjectService(so)
     
     if command == "initenv":
-        project.init()
+        project.init(util.sibpath(__file__, 'templates/settings.cfg'))
+        
     elif command == "upgrade":
         project.upgrade(so)
+        
     elif command == "build":
         project.build(so)
     elif command == "clean":

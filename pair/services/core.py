@@ -38,19 +38,13 @@ class ProjectService(object):
     def __repr__(self):
         r = "<BaseEnvironment name=%s/>" % (self.name)
 
-    def init(self):
+    def init(self, db_cfg):
         """
         Create a new project L{environment<pair.Environment>}.
-         
-         - create tables
-         - map classes
-         - create session
-         - create folder structure and files
         """
         from pair import db
                 
         # create database
-        db_cfg = util.sibpath(__file__, '../templates/settings.cfg')
         env_engine = db.connect(db_cfg)
 
         # setup mappings        
