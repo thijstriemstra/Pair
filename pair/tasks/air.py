@@ -10,17 +10,17 @@
 class AIRSource(object):
     """
     """
-    def __init__(self, base_dir=None, swf_name=None, source=None):
-        self.base_dir = base_dir
-        self.swf_name = swf_name
+    def __init__(self, base=None, swf=None, source=None):
+        self.base = base
+        self.swf = swf
         self.source = source
         self.libraries = None
-        self.entry_point = None
-        self.locale_path = None
+        self.entry = None
+        self.locale = None
         
     def __repr__(self):
-        r = "<AIRSource base_dir=%s swf_name=%s/>" % (
-            self.base_dir, self.swf_name)
+        r = "<AIRSource base=%s swf=%s/>" % (
+            self.base, self.swf)
         
         return r
 
@@ -31,10 +31,10 @@ class AIRCompiler(object):
         self.home = home
         self.libraries = libraries
         self.config = None
-        self.flex_tasks = None
+        self.ant = None
         self.asdoc = None
         self.benchmark = True
-        self.use_network = True
+        self.network = True
         
     def __repr__(self):
         r = "<AIRCompiler home=%s/>" % (self.home)
@@ -44,47 +44,47 @@ class AIRCompiler(object):
 class AIRDocs(object):
     """
     """
-    def __init__(self, output_dir=None, window_title=None):
-        self.output_dir = output_dir
-        self.window_title = window_title
-        self.domain_extensions = None
+    def __init__(self, output=None, windowtitle=None):
+        self.output = output
+        self.windowtitle = windowtitle
+        self.domains = None
         self.template = None
-        self.frame_width = 15
-        self.main_title = None
+        self.framewidth = 15
+        self.maintitle = None
         self.footer = None
         
     def __repr__(self):
-        r = "<AIRDocs output_dir=%s window_title=%s/>" % (
-            self.output_dir, self.window_title)
+        r = "<AIRDocs output=%s windowtitle=%s/>" % (
+            self.output, self.windowtitle)
         
         return r
 
 class AIRApplication(object):
     """
     """
-    def __init__(self, id=None, title=None):
-        self.id = id
+    def __init__(self, appid=None, title=None):
+        self.appid = appid
         self.title = title
         self.name = None
         self.description = None
-        self.system_chrome = 'standard'
+        self.systemchrome = 'standard'
         self.transparent = False
         self.visible = True
-        self.installFolder = None
+        self.installfolder = None
         self.maximizable = True
         self.minimizable = True
         self.resizable = False
         self.width = 500
         self.height = 500
-        self.min_size = [250, 250]
-        self.max_size = [750, 750]
+        self.minsize = [250, 250]
+        self.maxsize = [750, 750]
         self.x = 150
         self.y = 150
         self.icons = None
         
     def __repr__(self):
-        r = "<AIRApplication id=%s title=%s/>" % (
-            self.id, self.title)
+        r = "<AIRApplication appid=%s title=%s/>" % (
+            self.appid, self.title)
         
         return r
 
@@ -109,6 +109,7 @@ class AIRRuntime(object):
     """
     def __init__(self, version=None):
         self.version = '1.0.M6'
+        self.base = None
         self.packager = None
         self.debugger = None
         self.windows = None

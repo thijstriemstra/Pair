@@ -7,7 +7,7 @@
 @since: 1.0.0
 """
 
-class ProjectInfo(object):
+class Project(object):
     """
     """
     def __init__(self, name=None, description=None, language='en'):
@@ -20,8 +20,7 @@ class ProjectInfo(object):
         self.license = None
         
     def __repr__(self):
-        r = "<ProjectInfo name=%s version=%s/>" % (
-            self.name, self.version)
+        r = "<Project name='%s'/>" % (self.name)
         
         return r
 
@@ -43,15 +42,15 @@ class Organization(object):
 class BuildFolders(object):
     """
     """
-    def __init__(self, base_dir=None, build_dir=None, image_dir=None):
-        self.base_dir = base_dir
-        self.build_dir = build_dir
-        self.image_dir = image_dir
-        self.dist_dir = None
-        self.report_dir = None
+    def __init__(self, base=None, build=None, image=None):
+        self.base = base
+        self.build = build
+        self.image = image
+        self.dist = None
+        self.report = None
         
     def __repr__(self):
-        r = "<BuildFolders base_dir=%s build_dir=%s/>" % (
-            self.base_dir, self.build_dir)
+        r = "<BuildFolders base=%s build=%s/>" % (
+            self.base, self.build)
         
         return r

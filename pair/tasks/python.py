@@ -24,15 +24,15 @@ class PythonSource(object):
 class PythonDocs(object):
     """
     """
-    def __init__(self, output_type='html'):
-        self.output_type = output_type
-        self.output_dir = None
-        self.source_code = 'yes'
+    def __init__(self, type='html'):
+        self.type = type
+        self.dir = None
+        self.source = 'yes'
         self.frames = 'yes'
         
     def __repr__(self):
-        r = "<PythonDocs output_type=%s/>" % (
-            self.output_type)
+        r = "<PythonDocs type=%s/>" % (
+            self.type)
         
         return r
 

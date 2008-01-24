@@ -87,11 +87,25 @@ class ProjectEnvironment(BaseEnvironment):
          - create folder structure and files
         """
         from pair import db
-
+        from pair.tasks import Project
+        
         # create database
         db_cfg = util.sibpath(__file__, 'templates/settings.cfg')
         env_engine = db.connect(db_cfg)
 
+        # setup mappings        
+        db.mappings()
+        new_project = Project('Hello World', 'Test Project')
+
+        # create project
+        ses = db.session(env_engine)
+        ses.save(new_project)
+        ses.commit()
+
+        # query projects
+        for project in ses.query(Project):
+            print project.name
+        
         self.mkdir()
         self.chdir()
 
