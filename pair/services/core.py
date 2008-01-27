@@ -36,7 +36,7 @@ class ProjectService(object):
         self.components = []
 
     def __repr__(self):
-        r = "<BaseEnvironment name=%s/>" % (self.name)
+        r = "<ProjectService name=%s/>" % (self.name)
 
     def init(self, db_cfg):
         """
@@ -44,32 +44,22 @@ class ProjectService(object):
         """
         from pair import db
                 
-        # create database
-        env_engine = db.connect(db_cfg)
-
-        # setup mappings        
-        db.mappings()
-        ses = db.session(env_engine)
+        # setup database connection
+        ses = db.connect(db_cfg)
         
         # create project
-        proj = Project('Hello World', 'Test Project')
-        org = Organization('Collab')
-        proj.organizations.append(org)
-
-        # save project
-        ses.save(proj)
-        ses.commit()
+        proj = db.create_project(ses)
 
         # query projects
         for project in ses.query(Project):
-            print project.organizations
+            print 'Project:', project.organizations
         
-        self.mkdir()
-        self.chdir()
+        self._mkdir()
+        self._chdir()
 
-        self.sample_config(util.sibpath(__file__, '../templates/sample.cfg'))
-        self.sample_air(util.sibpath(__file__, '../templates/air'))
-        self.sample_python(util.sibpath(__file__, '../templates/python'))
+        self._sample_config(util.sibpath(__file__, '../templates/sample.cfg'))
+        self._sample_air(util.sibpath(__file__, '../templates/air'))
+        self._sample_python(util.sibpath(__file__, '../templates/python'))
         
         if not self.quiet:
             print "Project configured in %s" % self.basedir
@@ -131,6 +121,14 @@ class ProjectService(object):
         if not m.quiet:
             print "project configured in %s" % m.basedir
 
+    def build(self):
+        """
+        Build source.
+        
+        @param config:
+        @type config:
+        """
+        
     def report(self):
         """
         Generate project report.
@@ -147,7 +145,7 @@ class ProjectService(object):
         @type config:
         """
 
-    def chdir(self):
+    def _chdir(self):
         """
         Change into base directory.
         """
@@ -155,7 +153,7 @@ class ProjectService(object):
             print "Changing to", self.basedir
         os.chdir(self.basedir)
 
-    def mkdir(self):
+    def _mkdir(self):
         """
         Create new base directory, skip if it exists.
         """
@@ -169,7 +167,7 @@ class ProjectService(object):
             
         os.mkdir(self.basedir)
 
-    def sample_config(self, source):
+    def _sample_config(self, source):
         """
         Generate sample project configuration file.
 
@@ -196,7 +194,7 @@ class ProjectService(object):
         f.close()
         os.chmod(target, 0600)
         
-    def sample_air(self, source):
+    def _sample_air(self, source):
         """
         Generate sample AIR source and config files for the new project.
 
@@ -226,7 +224,7 @@ class ProjectService(object):
             os.mkdir(imgdir)
             os.makedirs(locdir)
             
-    def sample_python(self, source):
+    def _sample_python(self, source):
         """
         Generate sample Python source files for the new project.
 
@@ -244,7 +242,7 @@ class ProjectService(object):
         if not self.quiet:
             print "Populating python/"
 
-    def sample_install(self, source):
+    def _sample_install(self, source):
         """
         Cross-platform installer files (nsis/appinstaller).
 
@@ -262,7 +260,7 @@ class ProjectService(object):
         if not self.quiet:
             print "Populating installer/"
             
-    def mkinfo(self):
+    def _mkinfo(self):
         path = os.path.join(self.basedir, "info")
         if not os.path.exists(path):
             if not self.quiet: print "mkdir", path
@@ -286,25 +284,8 @@ class ProjectService(object):
             created = True
         if created and not self.quiet:
             print "Please edit the files in %s appropriately." % path
-        
-    def makefile(self):
-        target = "Makefile.sample"
-        if os.path.exists(target):
-            oldcontents = open(target, "rt").read()
-            if oldcontents == makefile_sample:
-                if not self.quiet:
-                    print "Makefile.sample already exists and is correct"
-                return
-            if not self.quiet:
-                print "replacing Makefile.sample"
-        else:
-            if not self.quiet:
-                print "creating Makefile.sample"
-        f = open(target, "wt")
-        f.write(makefile_sample)
-        f.close()
 
-    def populate_if_missing(self, target, source, overwrite=False):
+    def _populate_if_missing(self, target, source, overwrite=False):
         new_contents = open(source, "rt").read()
         if os.path.exists(target):
             old_contents = open(target, "rt").read()
@@ -325,7 +306,7 @@ class ProjectService(object):
                 print "populating %s" % target
             open(target, "wt").write(new_contents)
             
-    def upgrade_public_html(self, index_html, pair_css, dependencies_css, robots_txt):
+    def _upgrade_public_html(self, index_html, pair_css, dependencies_css, robots_txt):
         """
         """
         webdir = os.path.join(self.basedir, "public_html")
@@ -348,7 +329,7 @@ class ProjectService(object):
         self.populate_if_missing(os.path.join(webdir, "robots.txt"),
                                  robots_txt)
 
-    def check_master_cfg(self):
+    def _check_master_cfg(self):
         from buildbot.master import BuildMaster
         from twisted.python import log, failure
 

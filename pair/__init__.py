@@ -12,6 +12,7 @@ Pair: Python for the Adobe Integrated Runtime (AIR).
 
 @since: July 2007
 @status: Pre-Alpha
+@version: 1.0.0
 """
 
 __version__ = '1.0.0'
@@ -23,30 +24,9 @@ from pair.services.core import ProjectService
 
 from twisted.python import util
 
-def loadOptions(filename='project.cfg', folder=None):
-    """
-    @rtype:  dict
-    @return: a dictionary of names defined in the options file. If no options
-             file was found, return an empty dict.
-    """
-    localDict = {}
-
-    optfile = os.path.join(folder, filename)
-    
-    if os.path.exists(optfile):
-        try:
-            f = open(optfile, "r")
-            options = f.read()
-            #print exec(options)
-        except:
-            print "Error while reading %s" % optfile
-            raise
-            
-    return localDict
-
 def run():
     """
-    Start the Pair commandline tool.
+    Run the Pair commandline tool.
     """
     from twisted.python import usage
     
@@ -57,7 +37,7 @@ def run():
     except usage.error, e:
         print "%s:  %s" % (sys.argv[0], e)
         print
-        print "Pair %s" % Options.pair_version
+        print "Pair %s" % config.pair_version
         print
         c = getattr(config, 'subOptions', config)
         print str(c)
@@ -76,11 +56,15 @@ def run():
         
     elif command == "build":
         project.build(so)
+        
     elif command == "clean":
         project.clean(so)
+        
     elif command == "dist":
         project.dist(so)
+        
     elif command == "report":
         project.report(so)
+        
     elif command == "docs":
         project.docs(so)
