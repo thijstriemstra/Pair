@@ -2,12 +2,16 @@
 # See LICENSE for details.
 
 """
+Pair adapter for Adobe Integrated Runtime (AIR).
+
+@see: U{AIR on Adobe.com (external)<http://labs.adobe.com/air>}
+
 @author: U{Thijs Triemstra<mailto:info@collab.nl>}
 
 @since: 1.0.0
 """
 
-from pair.tasks import Runtime
+from pair import Application, Documentation, Runtime
 
 class AIRApplication(object):
     """

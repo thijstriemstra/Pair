@@ -2,14 +2,16 @@
 # See LICENSE for details.
 
 """
+Pair adapter for Python.
+
 @author: U{Thijs Triemstra<mailto:info@collab.nl>}
 
 @since: 1.0.0
 """
 
-from pair.tasks import Runtime
+from pair import Application, Documentation, Runtime
 
-class PythonApplication(object):
+class PythonApplication(Application):
     """
     """
     def __init__(self, source=None):
@@ -23,7 +25,7 @@ class PythonApplication(object):
         
         return r
 
-class PythonDocs(object):
+class PythonDocs(Documentation):
     """
     """
     def __init__(self, type='html'):
