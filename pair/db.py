@@ -2,22 +2,23 @@
 # See LICENSE for details.
 
 """
+Database for Pair core.
+
 @author: U{Thijs Triemstra<mailto:info@collab.nl>}
 
 @since: 1.0.0
 """
 
-from pair.services import core
-from pair.tasks import *
-from pair.tasks.air import *
-from pair.tasks.python import *
+from pair import core
+
+from pair.adapters import *
 
 from sqlalchemy import *
 from sqlalchemy.orm import relation, mapper, sessionmaker
 
-env_md = MetaData()
+core_md = MetaData()
 
-core.projects = Table('projects', env_md,
+core.projects = Table('projects', core_md,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('name', String(255), default='Untitled Project', nullable=True),
     Column('description', Text, default='Template for Pair project',
@@ -31,48 +32,50 @@ core.projects = Table('projects', env_md,
     Column('license', String(255), default='docs/LICENSE.txt', nullable=True)
 )
 
-core.organizations = Table('organizations', env_md,
+core.organizations = Table('organizations', core_md,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('name', String(255), default='The Pair Project', nullable=True),
     Column('unit', String(255), default='Collab', nullable=True),
     Column('country', String(100), default='The Netherlands', nullable=True),
-    Column('email', String(100), default='pair@collab.eu', nullable=True),
-    Column('project_id', Integer, ForeignKey('projects.id'))
+    Column('email', String(100), default='pair@collab.eu', nullable=True)
 )
 
-core.build_folders = Table('build_folders', env_md,
+core.build_folders = Table('build_folders', core_md,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('base', String(255), default='.', nullable=True),
     Column('build', String(255), default='build', nullable=True),
     Column('image', String(255), default='imagecontents', nullable=True),
     Column('dist', String(255), default='dist', nullable=True),
-    Column('report', String(255), default='report', nullable=True),
-    Column('project_id', Integer, ForeignKey('projects.id'))
+    Column('report', String(255), default='report', nullable=True)
 )
 
-core.python_applications = Table('python_applications', env_md,
+core.adapters = Table('adapters', core_md,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('source', String(255), default='python', nullable=True),
     Column('includes', String(255), default=None, nullable=True),
-    Column('excludes', String(255), default=None, nullable=True),
-    Column('project_id', Integer, ForeignKey('projects.id'))
+    Column('excludes', String(255), default=None, nullable=True)
 )
 
-core.python_docs = Table('python_docs', env_md,
+core.docs = Table('docs', core_md,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('type', String(10), default='html', nullable=True),
     Column('dir', String(255), default='reports/api/python', nullable=True),
     Column('source', String(10), default='yes', nullable=True),
-    Column('frames', String(10), default='yes', nullable=True),
-    Column('app_id', Integer, ForeignKey('python_applications.id'))
+    Column('frames', String(10), default='yes', nullable=True)
 )
 
-core.python_runtimes = Table('python_runtimes', env_md,
+core.runtimes = Table('runtimes', core_md,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('version', String(10), default='2.5', nullable=True),
     Column('optimize', Integer(2), default=2, nullable=True),
-    Column('windows', String(255), default='C:/Python25/python.exe', nullable=True),
-    Column('app_id', Integer, ForeignKey('python_applications.id'))
+    Column('windows', String(255), default='C:/Python25/python.exe', nullable=True)
+)
+
+core.libraries = Table('libraries', core_md,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('version', String(10), default='2.5', nullable=True),
+    Column('optimize', Integer(2), default=2, nullable=True),
+    Column('windows', String(255), default='C:/Python25/python.exe', nullable=True)
 )
 
 def connect(cfg_file):
@@ -102,14 +105,14 @@ def connect(cfg_file):
                                     cfg.get('database', 'host'),
                                     cfg.get('database', 'name'))
     
-    env_engine = create_engine(dsn, echo=False)
-    env_md.bind = env_engine
+    core_engine = create_engine(dsn, echo=False)
+    core_md.bind = core_engine
 
     if dev_mode:
         # create database
-        env_md.create_all()
+        core_md.create_all()
 
-    ses = setup_session(env_engine)
+    ses = setup_session(core_engine)
     
     return ses
 

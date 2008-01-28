@@ -19,8 +19,8 @@ __version__ = '1.0.0'
 
 import sys
 
-from pair import options
-from pair.services.core import ProjectService
+from pair.options import PairOptions
+from pair.core import CoreService, ProjectService
 
 from twisted.python import util
 
@@ -107,7 +107,7 @@ def run():
     """
     from twisted.python import usage
     
-    config = options.Options()
+    config = PairOptions()
     
     try:
         config.parseOptions()
@@ -124,10 +124,12 @@ def run():
     so = config.subOptions
 
     # 1. start core:
+    # - create core databases
     # - detect adapters
-    #
+    core = CoreService(so)
+    core.start()
+
     # 2. create project
-    # - 
     project = ProjectService(so)
     
     if command == "initenv":

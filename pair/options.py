@@ -136,7 +136,7 @@ class DocOptions(MakerBase):
     def getSynopsis(self):
         return "Usage:    pair docs <basedir>"
     
-class Options(usage.Options):
+class PairOptions(usage.Options):
     """
     Option list parser class.
     """
