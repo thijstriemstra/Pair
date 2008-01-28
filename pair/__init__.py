@@ -91,6 +91,16 @@ class Runtime(object):
         
         return r
 
+    def install(self):
+        """
+        Install the runtime.
+        """
+        
+    def uninstall(self):
+        """
+        Uninstall the runtime.
+        """
+
 def run():
     """
     Run the Pair commandline tool.
@@ -113,6 +123,11 @@ def run():
     command = config.subCommand
     so = config.subOptions
 
+    # 1. start core:
+    # - detect adapters
+    #
+    # 2. create project
+    # - 
     project = ProjectService(so)
     
     if command == "initenv":

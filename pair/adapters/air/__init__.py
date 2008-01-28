@@ -11,9 +11,42 @@ Pair adapter for Adobe Integrated Runtime (AIR).
 @since: 1.0.0
 """
 
+from pair.adapters import Adapter
 from pair import Application, Documentation, Runtime
 
-class AIRApplication(object):
+class AIRAdapter(Adapter):
+    """
+    Adapter for AIR.
+
+    Database:
+     - record in 'adapters' table
+     - multiple records in 'runtimes' table for different versions
+     - multiple records in 'doctools' table for different asdoc versions
+
+    Modules:
+     - '__init__' for class implementations
+     - 'db' for custom database info
+     - 'services' for remote methods
+    """
+
+    def install(self):
+        """
+        Install the AIR adapter.
+
+        Database:
+         - add record in 'adapters' table
+         - initial 'runtimes' record
+        """
+        
+    def uninstall(self):
+        """
+        Uninstall the AIR adapter.
+
+        Database:
+         - remove record from 'adapters' table
+        """
+        
+class AIRApplication(Application):
     """
     """
     def __init__(self, appid=None, title=None):
@@ -75,7 +108,7 @@ class AIRCompiler(object):
         
         return r
 
-class AIRDocs(object):
+class AIRDocs(Documentation):
     """
     """
     def __init__(self, output=None, windowtitle=None):

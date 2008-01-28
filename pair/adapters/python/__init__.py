@@ -9,8 +9,24 @@ Pair adapter for Python.
 @since: 1.0.0
 """
 
+from pair.adapters import Adapter
 from pair import Application, Documentation, Runtime
 
+class PythonAdapter(Adapter):
+    """
+    Adapter for Python.
+    """
+
+    def install(self):
+        """
+        Install the Python adapter.
+        """
+        
+    def uninstall(self):
+        """
+        Uninstall the Python adapter.
+        """
+        
 class PythonApplication(Application):
     """
     """

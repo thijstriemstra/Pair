@@ -19,8 +19,8 @@ env_md = MetaData()
 
 core.projects = Table('projects', env_md,
     Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('name', String(255), default='Pair Template', nullable=True),
-    Column('description', Text, default='Template application for Pair',
+    Column('name', String(255), default='Untitled Project', nullable=True),
+    Column('description', Text, default='Template for Pair project',
            nullable=True),
     Column('language', String(2), default='en', nullable=True),
     Column('version', String(10), default='1.0.0', nullable=True),
@@ -48,95 +48,6 @@ core.build_folders = Table('build_folders', env_md,
     Column('dist', String(255), default='dist', nullable=True),
     Column('report', String(255), default='report', nullable=True),
     Column('project_id', Integer, ForeignKey('projects.id'))
-)
-
-core.air_applications = Table('air_applications', env_md,
-    Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('appid', String(255), default='Pair', nullable=True),
-    Column('title', String(255), default='Hello World', nullable=True),
-    Column('name', String(255), default='Hello World', nullable=True),
-    Column('description', Text, default='Welcome to the installer.', nullable=True),
-    Column('systemchrome', String(255), default='standard', nullable=True),
-    Column('transparent', Boolean, default=False, nullable=True),
-    Column('visible', Boolean, default=True, nullable=True),  
-    Column('installfolder', String(255), default='Hello World', nullable=True),
-    Column('maximizable', Boolean, default=True, nullable=True),
-    Column('minimizable', Boolean, default=True, nullable=True),
-    Column('resizable', Boolean, default=False, nullable=True),
-    Column('width', Integer, default=500, nullable=True),
-    Column('height', Integer, default=500, nullable=True),
-    Column('minsize', String(255), default='250 500', nullable=True),
-    Column('maxsize', String(255), default='750 750', nullable=True),
-    Column('x', Integer, default=150, nullable=True),
-    Column('y', Integer, default=150, nullable=True),
-    Column('project_id', Integer, ForeignKey('projects.id'))
-)
-
-core.air_source = Table('air_source', env_md,
-    Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('base', String(255), default='air', nullable=True),
-    Column('swf', String(255), default='hello-world', nullable=True),
-    Column('source', String(255), default='src', nullable=True),
-    Column('libraries', String(255), default='lib', nullable=True),
-    Column('entry', String(255), default='main.mxml', nullable=True),
-    Column('locale', String(255), default='local', nullable=True),
-    Column('app_id', Integer, ForeignKey('air_applications.id'))
-)
-
-core.air_compilers = Table('air_compilers', env_md,
-    Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('home', String(255), default='/Developer/SDKs/flex3', nullable=True),
-    Column('libraries', String(255), default='lib', nullable=True),
-    Column('config', String(255), default='frameworks/air-config.xml', nullable=True),
-    Column('ant', String(255), default='ant/lib/flexTasks.jar', nullable=True),
-    Column('asdoc', String(255), default='bin/asdoc', nullable=True),
-    Column('benchmark', Boolean, default=True, nullable=True),
-    Column('network', Boolean, default=True, nullable=True),
-    Column('app_id', Integer, ForeignKey('air_applications.id'))
-)
-
-core.air_docs = Table('air_docs', env_md,
-    Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('output', String(255), default='reports/api/air', nullable=True),
-    Column('domains', String(255), default='', nullable=True),
-    Column('template', String(255), default='asdoc/templates', nullable=True),
-    Column('framewidth', Integer, default=150, nullable=True),
-    Column('windowtitle', String(255), default='API Documentation', nullable=True),
-    Column('maintitle', String(255), default='API Documentation', nullable=True),
-    Column('footer', String(255), default='API Documentation', nullable=True),
-    Column('app_id', Integer, ForeignKey('air_applications.id'))
-)
-
-core.air_icons = Table('air_icons', env_md,
-    Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('folder', String(255), default='samples/icons', nullable=True),
-    Column('icon16x16', String(255), default='AIRApp_16.png', nullable=True),
-    Column('icon32x32', String(255), default='AIRApp_32.png', nullable=True),
-    Column('icon48x48', String(255), default='AIRApp_48.png', nullable=True),
-    Column('icon128x128', String(255), default='AIRApp_128.png', nullable=True),
-    Column('app_id', Integer, ForeignKey('air_applications.id'))
-)
-
-core.air_runtimes = Table('air_runtimes', env_md,
-    Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('version', String(50), default='1.0.M6', nullable=True),
-    Column('packager', String(255), default='adt.jar', nullable=True),
-    Column('debugger', String(255), default='bin/adl', nullable=True),
-    Column('windows', String(255), default='C:/flex3/runtimes/air/win/Adobe AIR',
-           nullable=True),
-    Column('macosx', String(255),
-           default='/Developer/SDKs/flex3/runtimes/air/mac/Adobe AIR.framework',
-           nullable=True),
-    Column('app_id', Integer, ForeignKey('air_applications.id'))
-)
-
-core.air_certificates = Table('air_certificates', env_md,
-    Column('id', Integer, primary_key=True, autoincrement=True),
-    Column('name', String(50), default='My Certificate', nullable=True),
-    Column('type', String(255), default='2048-RSA', nullable=True),
-    Column('file', String(255), default='certificate.pfx', nullable=True),
-    Column('password', String(255), default='1234567890', nullable=True),
-    Column('app_id', Integer, ForeignKey('air_applications.id'))
 )
 
 core.python_applications = Table('python_applications', env_md,
