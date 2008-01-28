@@ -9,7 +9,7 @@ Database for Pair core.
 @since: 1.0.0
 """
 
-from pair import core
+from pair import core, project
 
 from pair.adapters import *
 
@@ -17,6 +17,9 @@ from sqlalchemy import *
 from sqlalchemy.orm import relation, mapper, sessionmaker
 
 core_md = MetaData()
+project_md = MetaData()
+
+# Core
 
 core.projects = Table('projects', core_md,
     Column('id', Integer, primary_key=True, autoincrement=True),
@@ -78,6 +81,22 @@ core.libraries = Table('libraries', core_md,
     Column('windows', String(255), default='C:/Python25/python.exe', nullable=True)
 )
 
+# Project
+
+project.applications = Table('applications', project_md,
+    Column('id', Integer, primary_key=True, autoincrement=True),
+    Column('name', String(255), default='Untitled Project', nullable=True),
+    Column('description', Text, default='Template for Pair project',
+           nullable=True),
+    Column('language', String(2), default='en', nullable=True),
+    Column('version', String(10), default='1.0.0', nullable=True),
+    Column('url', String(255), default='http://pair.collab.eu', nullable=True),
+    Column('copyright', Text,
+           default='Copyright 2007-2008 The Pair Project. All rights reserved.',
+           nullable=True),
+    Column('license', String(255), default='docs/LICENSE.txt', nullable=True)
+)
+
 def connect(cfg_file):
     """
     Connect to database.
@@ -106,12 +125,16 @@ def connect(cfg_file):
                                     cfg.get('database', 'name'))
     
     core_engine = create_engine(dsn, echo=False)
+    project_engine = create_engine(dsn, echo=False)
+    
     core_md.bind = core_engine
-
+    project_md.bind = project_engine
+    
     if dev_mode:
         # create database
         core_md.create_all()
-
+        project_md.create_all()
+        
     ses = setup_session(core_engine)
     
     return ses

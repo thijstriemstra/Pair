@@ -20,7 +20,8 @@ __version__ = '1.0.0'
 import sys
 
 from pair.options import PairOptions
-from pair.core import CoreService, ProjectService
+from pair.core import CoreService
+from pair.project import ProjectService
 
 class Project(object):
     """
@@ -124,7 +125,7 @@ def run():
     core = CoreService(so)
     core.create()
 
-    # 2. create project
+    # create project
     project = ProjectService(so)
     
     if command == "initenv":
