@@ -7,6 +7,36 @@
 @since: 1.0.0
 """
 
+from pair.tasks import Runtime
+
+class AIRApplication(object):
+    """
+    """
+    def __init__(self, appid=None, title=None):
+        self.appid = appid
+        self.title = title
+        self.name = None
+        self.description = None
+        self.systemchrome = None
+        self.transparent = False
+        self.visible = True
+        self.installfolder = None
+        self.maximizable = True
+        self.minimizable = True
+        self.resizable = False
+        self.width = None
+        self.height = None
+        self.minsize = None
+        self.maxsize = None
+        self.x = None
+        self.y = None
+        
+    def __repr__(self):
+        r = "<AIRApplication appid=%s title=%s/>" % (
+            self.appid, self.title)
+        
+        return r
+
 class AIRSource(object):
     """
     """
@@ -49,7 +79,7 @@ class AIRDocs(object):
         self.windowtitle = windowtitle
         self.domains = None
         self.template = None
-        self.framewidth = 15
+        self.framewidth = None
         self.maintitle = None
         self.footer = None
         
@@ -59,41 +89,12 @@ class AIRDocs(object):
         
         return r
 
-class AIRApplication(object):
-    """
-    """
-    def __init__(self, appid=None, title=None):
-        self.appid = appid
-        self.title = title
-        self.name = None
-        self.description = None
-        self.systemchrome = 'standard'
-        self.transparent = False
-        self.visible = True
-        self.installfolder = None
-        self.maximizable = True
-        self.minimizable = True
-        self.resizable = False
-        self.width = 500
-        self.height = 500
-        self.minsize = [250, 250]
-        self.maxsize = [750, 750]
-        self.x = 150
-        self.y = 150
-        self.icons = None
-        
-    def __repr__(self):
-        r = "<AIRApplication appid=%s title=%s/>" % (
-            self.appid, self.title)
-        
-        return r
-
 class AIRIcons(object):
     """
     """
     def __init__(self, folder=None):
         self.folder = folder
-        self.icon16x16 = title
+        self.icon16x16 = None
         self.icon32x32 = None
         self.icon48x48 = None
         self.icon128x128 = None
@@ -104,17 +105,16 @@ class AIRIcons(object):
         
         return r
 
-class AIRRuntime(object):
+class AIRRuntime(Runtime):
     """
     """
-    def __init__(self, version=None):
-        self.version = '1.0.M6'
+    def __init__(self, name='Adobe Integrated Runtime', version='1.0.M6'):
+        self.name = name
+        self.version = version
         self.base = None
         self.packager = None
         self.debugger = None
-        self.windows = None
-        self.macosx = None
-                
+                        
     def __repr__(self):
         r = "<AIRRuntime version=%s/>" % (
             self.version)

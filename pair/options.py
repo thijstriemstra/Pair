@@ -1,6 +1,12 @@
 # Copyright (c) 2007-2008 The Pair Project. All rights reserved.
 # See LICENSE for details.
 
+"""
+@author: U{Thijs Triemstra<mailto:info@collab.nl>}
+
+@since: 1.0.0
+"""
+
 import os, sys, stat, re, time
 
 import pair
@@ -119,7 +125,17 @@ class ReportOptions(MakerBase):
 
     def getSynopsis(self):
         return "Usage:    pair report <basedir>"
-  
+
+class DocOptions(MakerBase):
+    """
+    """
+    optFlags = [
+        ['quiet', 'q', "Don't display log messages about reconfiguration"],
+    ]
+
+    def getSynopsis(self):
+        return "Usage:    pair docs <basedir>"
+    
 class Options(usage.Options):
     """
     Option list parser class.
@@ -150,7 +166,7 @@ class Options(usage.Options):
         ['report', None, ReportOptions,
          "Generate project report"],
         
-        ['docs', None, ReportOptions,
+        ['docs', None, DocOptions,
          "Create project documentation"],
     ]
        

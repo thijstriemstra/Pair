@@ -52,7 +52,15 @@ class ProjectService(object):
 
         # query projects
         for project in ses.query(Project):
-            print 'Project:', project.organizations
+            print 'AIR:', project.air
+            for app in project.air:
+                print 'source:', app.source
+                print 'runtimes:', app.runtimes
+            print
+            print 'Python:', project.python
+            for app in project.python:
+                print 'source:', app.source
+                print 'runtimes:', app.runtimes
         
         self._mkdir()
         self._chdir()

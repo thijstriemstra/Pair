@@ -7,7 +7,9 @@
 @since: 1.0.0
 """
 
-class PythonSource(object):
+from pair.tasks import Runtime
+
+class PythonApplication(object):
     """
     """
     def __init__(self, source=None):
@@ -16,7 +18,7 @@ class PythonSource(object):
         self.excludes = None
         
     def __repr__(self):
-        r = "<PythonSource source=%s/>" % (
+        r = "<PythonApplication source=%s/>" % (
             self.source)
         
         return r
@@ -27,8 +29,8 @@ class PythonDocs(object):
     def __init__(self, type='html'):
         self.type = type
         self.dir = None
-        self.source = 'yes'
-        self.frames = 'yes'
+        self.source = None
+        self.frames = None
         
     def __repr__(self):
         r = "<PythonDocs type=%s/>" % (
@@ -36,13 +38,13 @@ class PythonDocs(object):
         
         return r
 
-class PythonRuntime(object):
+class PythonRuntime(Runtime):
     """
     """
-    def __init__(self, version=None):
-        self.version = '2.5'
-        self.optimize = 2
-        self.windows = None
+    def __init__(self, name='Python', version='2.5'):
+        self.name = name
+        self.version = version
+        self.optimize = None
                 
     def __repr__(self):
         r = "<PythonRuntime version=%s/>" % (
