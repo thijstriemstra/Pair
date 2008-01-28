@@ -17,7 +17,7 @@ from twisted.python import util
 
 # defined when connected to the database
 projects = organizations = build_folders = adapters = runtimes = \
-docs = libraries = None
+doctools = libraries = None
 
 class CoreService(object):
     """
@@ -37,9 +37,12 @@ class CoreService(object):
     def __repr__(self):
         r = "<CoreService name=%s/>" % (self.name)
 
-    def start(self):
+    def create(self):
         """
-        Start the core service.
+        Create the core database.
+
+         - create core databases
+         - detect adapters
         """
         from pair import db
                 
@@ -60,6 +63,8 @@ class CoreService(object):
             for app in project.python:
                 print 'source:', app.source
                 print 'runtimes:', app.runtimes
+
+        # detect adapters
         
         self._mkdir()
         self._chdir()

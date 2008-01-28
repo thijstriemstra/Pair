@@ -56,7 +56,7 @@ core.adapters = Table('adapters', core_md,
     Column('excludes', String(255), default=None, nullable=True)
 )
 
-core.docs = Table('docs', core_md,
+core.doctools = Table('doctools', core_md,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('type', String(10), default='html', nullable=True),
     Column('dir', String(255), default='reports/api/python', nullable=True),

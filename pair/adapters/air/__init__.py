@@ -17,33 +17,16 @@ from pair import Application, Documentation, Runtime
 class AIRAdapter(Adapter):
     """
     Adapter for AIR.
-
-    Database:
-     - record in 'adapters' table
-     - multiple records in 'runtimes' table for different versions
-     - multiple records in 'doctools' table for different asdoc versions
-
-    Modules:
-     - '__init__' for class implementations
-     - 'db' for custom database info
-     - 'services' for remote methods
     """
 
     def install(self):
         """
         Install the AIR adapter.
-
-        Database:
-         - add record in 'adapters' table
-         - initial 'runtimes' record
         """
         
     def uninstall(self):
         """
         Uninstall the AIR adapter.
-
-        Database:
-         - remove record from 'adapters' table
         """
         
 class AIRApplication(Application):

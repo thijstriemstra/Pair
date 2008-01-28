@@ -22,8 +22,6 @@ import sys
 from pair.options import PairOptions
 from pair.core import CoreService, ProjectService
 
-from twisted.python import util
-
 class Project(object):
     """
     Project.
@@ -105,7 +103,7 @@ def run():
     """
     Run the Pair commandline tool.
     """
-    from twisted.python import usage
+    from twisted.python import usage, util
     
     config = PairOptions()
     
@@ -123,11 +121,8 @@ def run():
     command = config.subCommand
     so = config.subOptions
 
-    # 1. start core:
-    # - create core databases
-    # - detect adapters
     core = CoreService(so)
-    core.start()
+    core.create()
 
     # 2. create project
     project = ProjectService(so)
@@ -140,6 +135,9 @@ def run():
         
     elif command == "build":
         project.build(so)
+
+    elif command == "run":
+        project.run(so)
         
     elif command == "clean":
         project.clean(so)
