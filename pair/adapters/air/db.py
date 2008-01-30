@@ -9,17 +9,14 @@ Database for AIR adapter.
 @since: 1.0.0
 """
 
-from pair.services import core
-from pair.tasks import *
-from pair.tasks.air import *
-from pair.tasks.python import *
+from pair import core
 
 from sqlalchemy import *
 from sqlalchemy.orm import relation, mapper, sessionmaker
 
-env_md = MetaData()
+air_md = MetaData()
 
-core.air_applications = Table('air_applications', env_md,
+core.air_applications = Table('air_applications', air_md,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('appid', String(255), default='Pair', nullable=True),
     Column('title', String(255), default='Hello World', nullable=True),
@@ -41,7 +38,7 @@ core.air_applications = Table('air_applications', env_md,
     Column('project_id', Integer, ForeignKey('projects.id'))
 )
 
-core.air_source = Table('air_source', env_md,
+core.air_source = Table('air_source', air_md,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('base', String(255), default='air', nullable=True),
     Column('swf', String(255), default='hello-world', nullable=True),
@@ -52,7 +49,7 @@ core.air_source = Table('air_source', env_md,
     Column('app_id', Integer, ForeignKey('air_applications.id'))
 )
 
-core.air_compilers = Table('air_compilers', env_md,
+core.air_compilers = Table('air_compilers', air_md,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('home', String(255), default='/Developer/SDKs/flex3', nullable=True),
     Column('libraries', String(255), default='lib', nullable=True),
@@ -64,7 +61,7 @@ core.air_compilers = Table('air_compilers', env_md,
     Column('app_id', Integer, ForeignKey('air_applications.id'))
 )
 
-core.air_docs = Table('air_docs', env_md,
+core.air_docs = Table('air_docs', air_md,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('output', String(255), default='reports/api/air', nullable=True),
     Column('domains', String(255), default='', nullable=True),
@@ -76,7 +73,7 @@ core.air_docs = Table('air_docs', env_md,
     Column('app_id', Integer, ForeignKey('air_applications.id'))
 )
 
-core.air_icons = Table('air_icons', env_md,
+core.air_icons = Table('air_icons', air_md,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('folder', String(255), default='samples/icons', nullable=True),
     Column('icon16x16', String(255), default='AIRApp_16.png', nullable=True),
@@ -86,7 +83,7 @@ core.air_icons = Table('air_icons', env_md,
     Column('app_id', Integer, ForeignKey('air_applications.id'))
 )
 
-core.air_runtimes = Table('air_runtimes', env_md,
+core.air_runtimes = Table('air_runtimes', air_md,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('version', String(50), default='1.0.M6', nullable=True),
     Column('packager', String(255), default='adt.jar', nullable=True),
@@ -99,7 +96,7 @@ core.air_runtimes = Table('air_runtimes', env_md,
     Column('app_id', Integer, ForeignKey('air_applications.id'))
 )
 
-core.air_certificates = Table('air_certificates', env_md,
+core.air_certificates = Table('air_certificates', air_md,
     Column('id', Integer, primary_key=True, autoincrement=True),
     Column('name', String(50), default='My Certificate', nullable=True),
     Column('type', String(255), default='2048-RSA', nullable=True),

@@ -2,6 +2,8 @@
 # See LICENSE for details.
 
 """
+Remoting services for AIR adapter.
+
 @author: U{Thijs Triemstra<mailto:info@collab.nl>}
 
 @since: 1.0.0
@@ -9,20 +11,16 @@
 
 import os, sys
 
-from pair.tasks import *
-
 from sqlalchemy.sql import select, insert, and_
 
 from twisted.python import util
 
 # defined when connected to the database
-projects = organizations = build_folders = air_source = air_compilers = \
-air_docs = air_applications = air_icons = air_runtimes = air_certificates = \
-python_source = python_docs = python_runtimes = None
+air_source = air_compilers = air_docs = air_applications = air_icons = \
+air_runtimes = air_certificates = None
 
-class ProjectService(object):
+class AIRService(object):
     """
-    Base class for an environment.
     """
     def __init__(self, cmd_options):
         """
@@ -36,7 +34,7 @@ class ProjectService(object):
         self.components = []
 
     def __repr__(self):
-        r = "<ProjectService name=%s/>" % (self.name)
+        r = "<AIRService name=%s/>" % (self.name)
 
     def init(self, db_cfg):
         """
