@@ -1,4 +1,0 @@
-#!/usr/local/bin/python
-
-import pair
-pair.run()
