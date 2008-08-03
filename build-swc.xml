@@ -1,0 +1,23 @@
+<!--
+ To build pair.swc, use
+
+   compc -load-config=build-swc.xml
+-->
+<flex-config>
+   <benchmark>true</benchmark>
+   <compiler>
+      <external-library-path>
+         <path-element>${flexlib}/libs/playerglobal.swc</path-element>
+      </external-library-path>
+      <source-path>
+         <path-element>.</path-element>
+      </source-path>
+   </compiler>
+   <metadata>
+      <creator>The Pair Project</creator>
+      <description>http://pair.collab.eu/</description>
+      <language>EN</language>
+      <title>AS3 Standard Library</title>
+   </metadata>
+   <output>bin/pair.swc</output>
+</flex-config>
