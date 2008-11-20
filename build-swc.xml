@@ -7,7 +7,7 @@
    <benchmark>true</benchmark>
    <compiler>
       <external-library-path>
-         <path-element>${flexlib}/libs/playerglobal.swc</path-element>
+         <path-element>${flexlib}/libs/player/9/playerglobal.swc</path-element>
       </external-library-path>
       <source-path>
          <path-element>.</path-element>

@@ -16,7 +16,8 @@ package eu.collab.pair.sys
 			super();
 		}
 		
-		override public function writeMultiByte(value:String, charSet:String):void
+		override public function writeMultiByte( value:String,
+												 charSet:String ):void
 		{
 			trace(value.substr(0, value.length-1));
 		}
